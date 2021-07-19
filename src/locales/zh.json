@@ -96,7 +96,8 @@
       "projects": "项目列表",
       "datasets": "数据集列表",
       "images": "镜像列表",
-      "containers": "容器列表"
+      "containers": "容器列表",
+      "file": "文件管理"
     },
     "menu": {
       "text": "菜单"

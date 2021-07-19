@@ -162,6 +162,14 @@ export default [
     component: () => import('./views/DvcAI/user/profile'),
   },
   {
+    path: '/file',
+    name: '文件管理',
+    meta: {
+      authRequired: true,
+    },
+    component: () => import('./views/DvcAI/file-manager'),
+  },
+  {
     path: '/404',
     name: '404',
     component: require('./views/DvcAI/utility/404').default,

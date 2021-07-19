@@ -29,6 +29,12 @@ export const menuItems = [
         label: "menuitems.dvcai.containers",
         icon: "bx-cube",
         link: "/containers"
+    },
+    {
+        id: 6,
+        label: "menuitems.dvcai.file",
+        icon: "bx-cube",
+        link: "/file"
     }
     // {
     //     id: 1,
