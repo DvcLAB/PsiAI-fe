@@ -33,7 +33,7 @@ export const menuItems = [
     {
         id: 6,
         label: "menuitems.dvcai.file",
-        icon: "bx-cube",
+        icon: "bx-file",
         link: "/file"
     }
     // {

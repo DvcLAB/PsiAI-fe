@@ -81,6 +81,7 @@ export default {
     <div class="d-xl-flex">
       <div class="w-100">
         <div class="d-md-flex">
+          <!-- 文件管理页左侧，bucket列表 -->
           <div class="card filemanager-sidebar me-md-2">
             <div class="card-body">
               <div class="d-flex flex-column h-100">
@@ -225,7 +226,7 @@ export default {
                   </ul>
                 </div>
 
-                <div class="mt-auto">
+                <!-- <div class="mt-auto">
                   <b-alert show dismissible variant="success">
                     <div class="mb-3">
                       <i class="bx bxs-folder-open h1 text-success"></i>
@@ -244,12 +245,12 @@ export default {
                       </div>
                     </div>
                   </b-alert>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
           <!-- filemanager-leftsidebar -->
-
+          <!-- 文件管理页右侧，bucket里的文件 -->
           <div class="w-100">
             <div class="card">
               <div class="card-body">
@@ -969,7 +970,7 @@ export default {
         </div>
       </div>
 
-      <div class="card filemanager-sidebar ms-lg-2">
+      <!-- <div class="card filemanager-sidebar ms-lg-2">
         <div class="card-body">
           <div class="text-center">
             <h5 class="font-size-15 mb-4">Storage</h5>
@@ -1112,7 +1113,7 @@ export default {
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
     <!-- end row -->
   </Layout>
