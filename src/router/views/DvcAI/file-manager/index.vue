@@ -4,7 +4,17 @@
 // import appConfig from "@/app.config";
 import Layout from "@/router/layouts/main";
 import appConfig from "@/app.config";
-
+var Minio = require('minio')
+ 
+// Instantiate the minio client with the endpoint
+// and access keys as shown below.
+ 
+ 
+var s3Client = new Minio.Client({
+    endPoint:  's3.dvclab.com',
+    accessKey: 'BDW8411E3QL3YPM0VBFU',
+    secretKey: 'boyNlzloIsfVZ1SgnuCZEM9jCTvaObAHDkyLRyFi'
+})
 /**
  * File-manager component
  */
@@ -73,6 +83,34 @@ export default {
       },
     };
   },
+  mounted(){
+    this.listBucket();
+  },
+  methods: {
+    listBucket(){
+      // File that needs to be uploaded.
+      var file = './hello.txt'
+      
+      // Make a bucket called europetrip.
+      s3Client.makeBucket('europetrip', 'us-east-1', function(err) {
+          if (err) return console.log(err)
+      
+          console.log('Bucket created successfully in "us-east-1".')
+      
+          var metaData = {
+              'Content-Type': 'application/octet-stream',
+              'X-Amz-Meta-Testing': 1234,
+              'example': 5678
+          }
+          // Using fPutObject API upload your file to the bucket europetrip.
+          s3Client.fPutObject('europetrip', 'photos-europe.tar', file, metaData, function(err) {
+            if (err) return console.log(err)
+            console.log('File uploaded successfully.')
+          });
+      });
+
+    }
+  },
 };
 </script>
 
@@ -91,16 +129,16 @@ export default {
                       toggle-class="btn-block w-100"
                       variant="light"
                     >
-                      <template #button-content>
+                      <template #button-content @click="listBucket">
                         <i class="mdi mdi-plus me-1"></i> Create New
                       </template>
 
                       <b-dropdown-item href="#"
                         ><i class="bx bx-folder me-1"></i>
-                        Folder</b-dropdown-item
+                        Bucket</b-dropdown-item
                       >
                       <b-dropdown-item href="#"
-                        ><i class="bx bx-file me-1"></i> File</b-dropdown-item
+                        ><i class="bx bx-file me-1"></i> Dataset </b-dropdown-item
                       >
                     </b-dropdown>
                   </div>
