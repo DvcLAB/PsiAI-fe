@@ -13,6 +13,14 @@ module.exports = {
     // transportMode: 'ws',
     disableHostCheck: true,
     // proxy: {
+    //   '/ip': {
+    //     target: 'https://s3.dvclab.com',
+    //     pathRewrite: {'^/ws' : ''},
+    //     changeOrigin: true,     // target是域名的话，需要这个参数，
+    //     secure: true,          // 设置支持https协议的代理
+    //   },
+    // },
+    // proxy: {
     //   '/ws': {
     //     target: 'wss://j.dvclab.com:50000/',
         
@@ -24,5 +32,6 @@ module.exports = {
     //     }
     //   },
     // }
+
   }
 }

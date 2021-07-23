@@ -104,7 +104,7 @@ export default {
 </script>
 <template>
   <div>
-    <PageHeader :title="title" :items="items" />
+    <PageHeader :title="dataset.name" :items="items" />
     <LoaderContainer :loading="loadingState">
       <div class="row font-size-14">
         
