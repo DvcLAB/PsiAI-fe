@@ -37,7 +37,7 @@ export default {
       </template>
       <Config :dataset="dataset" :isAdmin="isAdmin"/>
     </b-tab>
-    <b-tab active class="border-0">
+    <b-tab class="border-0">
       <template v-slot:title>
         <span class="d-inline-block d-sm-none">
           <i class="bx bx-file"></i>
