@@ -46,6 +46,7 @@ export default {
       flag: null,
       value: null,
       keycloak_url: " https://auth.dvclab.com/auth/admin/DvcLAB/console/#/realms/DvcLAB/users",
+      set_account_url: "https://auth.dvclab.com/auth/realms/DvcLAB/account",
     }
   },
   filters:{
@@ -143,6 +144,9 @@ export default {
     //跳转到keycloak用户权限管理登录页面
     toKeycloak() {
       window.location.href = this.keycloak_url
+    },
+    toSetAccount() {
+      window.location.href = this.set_account_url
     }
   },
 };
@@ -784,7 +788,11 @@ export default {
           </a> -->
           <b-dropdown-item v-if="isAdmin" @click="toKeycloak">
             <i class="bx bx-cog font-size-16 align-middle me-1"></i>
-            用户列表
+            用户管理
+          </b-dropdown-item>
+          <b-dropdown-item @click="toSetAccount">
+            <i class="bx bx-wrench font-size-16 align-middle me-1"></i>
+            账户设置
           </b-dropdown-item>
           <b-dropdown-item @click="toProfile">
             <i class="bx bx-user font-size-16 align-middle me-1"></i>
