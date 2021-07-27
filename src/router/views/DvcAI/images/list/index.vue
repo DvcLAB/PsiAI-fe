@@ -5,7 +5,7 @@ import Loader from "@/components/DvcAI/loader";
 import appConfig from "@/app.config";
 import Autocomplete from '@trevoreyre/autocomplete-vue';
 import { getScrollHeight, getScrollTop, getWindowHeight } from "@/utils/screen";
-import Swal from "sweetalert2";
+// import Swal from "sweetalert2";
 
 /**
  * 镜像列表
@@ -190,26 +190,24 @@ export default {
 
     // 跳转创建镜像页面
     toCreateImagePage() {
-      console.log('函数进来了')
       this.$router.push({path: '/images/create'})
-      console.log('函数执行完了')
     },
 
     // 点击上传镜像先验证是否已设置合法的用户名和密码
-    AccountSet() {
-      Swal.fire({
-        title:"上传镜像需要完善账号密码",
-        text: "用户名需为字母或数字的组合，不可使用特殊符号",
-        icon:"info",
-        showCancelButton: true,
-        confirmButtonText: '去设置',
-        cancelButtonText: '取消',
-      }).then((res) => {
-        if(res.isConfirmed) {
-          window.location.href = this.set_account_url
-        }
-      })
-    },
+    // AccountSet() {
+    //   Swal.fire({
+    //     title:"上传镜像需要完善账号密码",
+    //     text: "用户名需为字母或数字的组合，不可使用特殊符号",
+    //     icon:"info",
+    //     showCancelButton: true,
+    //     confirmButtonText: '去设置',
+    //     cancelButtonText: '取消',
+    //   }).then((res) => {
+    //     if(res.isConfirmed) {
+    //       window.location.href = this.set_account_url
+    //     }
+    //   })
+    // },
   }
 };
 </script>
@@ -243,7 +241,7 @@ export default {
         <button
           type="button"
           class="btn btn-success btn-rounded float-end"
-          @click="AccountSet"
+          @click="toCreateImagePage"
         >
           <i class="mdi mdi-plus me-1"></i> 创建镜像
         </button>
