@@ -1,6 +1,6 @@
 <script>
 import vue2Dropzone from "vue2-dropzone";
-import FileTemplate from "./file-template.vue"
+import FileTemplateList from "./file-template-list.vue"
 var Minio = require('minio')
  
 // Instantiate the minio client with the endpoint
@@ -44,7 +44,7 @@ export default {
       bucketname: this.datasetname,
     };
   },
-  components: {vueDropzone: vue2Dropzone, FileTemplate},
+  components: {vueDropzone: vue2Dropzone, FileTemplateList},
   mounted() {
     this.listFiles();
   },
@@ -129,9 +129,24 @@ export default {
 
                 <!-- My File内容，文件浏览 -->
                 <div>
-                  <div class="row">
-                    <FileTemplate  v-for="item in objStream" :key="item.id" :file="item" :bucket="datasetname" :fileList="objStream" />
+                  <div class="table-responsive">
+                    <table
+                      class="table align-middle table-nowrap table-hover mb-0"
+                      style="table-layout: fixed; "
+                    >
+                      <thead>
+                        <tr>
+                          <th scope="col" style="width:45%">名称</th>
+                          <th scope="col" style="width:30%">更新时间</th>
+                          <th scope="col" colspan="2" style="width:25%">大小</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <FileTemplateList  v-for="item in objStream" :key="item.id" :file="item" :bucket="datasetname" :fileList="objStream" />
+                      </tbody>
+                    </table>
                   </div>
+                  
                   <!-- end row -->
                 </div>
                  </div>

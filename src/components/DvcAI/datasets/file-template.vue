@@ -20,67 +20,34 @@ export default {
         return {
             icon_class: '',
             icon: {
-                    "png":'bx bx-image-alt',
-					"jpg": 'bx bx-image-alt',
-					"jpeg": 'bx bx-image-alt',
-                    "txt": 'bx bxs-file-txt',
-                    "md": 'bx bxs-file-md',
-                    "doc":'bx bxs-file-doc',
-					"gif": 'bx bxs-file-gif',
-                    "json": 'bx bxs-file-json',
-                    "js": 'bx bxs-file-js',
-                    "css":'bx bxs-file-css',
-					"html": 'bx bxs-file-html',
-                    "pdf": 'bx bxs-file-pdf',
-                    "": 'bx bxs-folder',
-                    "gz": 'bx bxs-folder',
-				// {
-                //     'png':'bx bx-image-alt'
-                // },
-                // {
-				// 	icon_class: 'bx bx-image-alt',
-				// 	suffix: 'jpg'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-txt',
-				// 	suffix: 'txt'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-md',
-				// 	suffix: 'md'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-doc',
-				// 	suffix: 'doc'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-gif',
-				// 	suffix: 'gif'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-json',
-				// 	suffix: 'json'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-js',
-				// 	suffix: 'js'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-css',
-				// 	suffix: 'css'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-html',
-				// 	suffix: 'html'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-file-pdf',
-				// 	suffix: 'pdf'
-				// },
-				// {
-				// 	icon_class: 'bx bxs-folder',
-				// 	suffix: ''
-				// }
+                    // "png":'bx bx-image-alt',
+					// "jpg": 'bx bx-image-alt',
+					// "jpeg": 'bx bx-image-alt',
+                    // "txt": 'bx bxs-file-txt',
+                    // "md": 'bx bxs-file-md',
+                    // "doc":'bx bxs-file-doc',
+					// "gif": 'bx bxs-file-gif',
+                    // "json": 'bx bxs-file-json',
+                    // "js": 'bx bxs-file-js',
+                    // "css":'bx bxs-file-css',
+					// "html": 'bx bxs-file-html',
+                    // "pdf": 'bx bxs-file-pdf',
+                    // "": 'bx bxs-folder',
+                    // "gz": 'bx bxs-folder',
+                "png":'mdi mdi-image text-muted',
+                "jpg": 'mdi mdi-image text-muted',
+                "jpeg": 'mdi mdi-image text-muted',
+                "txt": 'mdi mdi-text-box text-muted',
+                "md": 'mdi mdi-file-document text-primary',
+                "doc":'mdi mdi-file-document text-primary',
+                "gif": 'mdi-gif text-primary',
+                "json": 'bx bxs-file-json text-muted',
+                "js": 'bx bxs-file-js text-muted',
+                "css":'bx bxs-file-css text-muted',
+                "html": 'mdi mdi-file-document text-primary',
+                "pdf": 'mdi-file-pdf text-danger',
+                "": 'mdi mdi-folder text-warning',
+                "gz": 'mdi mdi-folder-zip text-warning',
             }
         }
     },
@@ -122,7 +89,7 @@ export default {
 			// 截取路径“.”后面的字符串
 			var suffix = filename.substring(filename.lastIndexOf('.') + 1);
             // 如果icon集合中没定义这种类型的文件的icon名，就统一用'bx bxs-file-blank'
-            this.icon_class = this.icon.hasOwnProperty(suffix) ? this.icon[suffix] : 'bx bxs-file-blank';
+            this.icon_class = this.icon.hasOwnProperty(suffix) ? this.icon[suffix] : 'mdi mdi-file-document text-primary';
             return this.icon_class;
 		},
 
@@ -135,7 +102,10 @@ export default {
               }
               console.log('Removed the object')
             });
-            this.$parent.listFiles();
+            this.$parent.objStream = this.$parent.objStream.filter((item) => {
+                return !this.file.name.includes(item.name)
+            });
+            // this.$parent.listFiles();
         },
     }
 }
@@ -156,16 +126,9 @@ export default {
                             <template #button-content>
                                 <i class="mdi mdi-dots-horizontal"></i>
                             </template>
-
-                            <b-dropdown-item href="#">Open</b-dropdown-item>
-                            <b-dropdown-item href="#">Edit</b-dropdown-item>
-                            <b-dropdown-item href="#"
-                                >Rename</b-dropdown-item
-                            >
-                            <b-dropdown-divider></b-dropdown-divider>
-                            <b-dropdown-item href="#" @click="removeFile"
-                                >Remove</b-dropdown-item
-                            >
+                            <b-dropdown-item href="#">下载</b-dropdown-item>
+                            <!-- <b-dropdown-divider></b-dropdown-divider> -->
+                            <b-dropdown-item href="#" @click="removeFile">删除</b-dropdown-item>
                         </b-dropdown>
                     </div>
                     <div class="avatar-xs me-3 mb-3">
