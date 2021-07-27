@@ -40,7 +40,6 @@ export default {
           <DatasetItem v-for="item in datasets" :key="item.id" :dataset="item"/>
         </div>
       </div>
-
     </div>
 
     <div v-else-if="datasets.length === 0 && !updating" class="text-center text-secondary mt-4">

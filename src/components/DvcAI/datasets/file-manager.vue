@@ -1,5 +1,6 @@
 <script>
 import vue2Dropzone from "vue2-dropzone";
+import FileTemplate from "./file-template.vue"
 var Minio = require('minio')
  
 // Instantiate the minio client with the endpoint
@@ -10,11 +11,24 @@ var s3Client = new Minio.Client({
     endPoint:  's3.dvclab.com',
     accessKey: '7AU2ABLFK9VB2CWZB1JM',
     secretKey: 'WNS7mbQPqdb4l7GJsBcOtOWds5SnesvyleuKIoNl'
+    // secretKey: 'YYM1XF9VQMI3P90F0Q0RD6122GVEZJXXDTZMMII',
+    // accessKey: 'IugELbZbxF9YTFgRPBr' ,
+    // sessionToken: '2ISrrBv9aP2+pIs+Jj8kkyRUTpCIUP78U9Ge5I2WBiM+gpbAtLu2VCJB1vLdogPHSuLIlG9LEMp757xs1Iwy2c+1JWqNgImT2rV4XCdZx+4CplKpYfeEQNDmzuxdzmX5oFT1eL5NM32bGv0V8n5/75tzsBM5LuosFMrt4wHegH7JdK/m3TDhnSqcVE6uoM6ddNPhghP+8dtMj7sVK3dfT+LAW5YVbPITHjVnX3JSmY1Oc32ZHDTRR8WYpVwUgPFRMCB317AZAfcahDGahWXAWeq++JKtJaPtDno2rmDvDCAyS6/wB3FhaIGvZoylbjHrlSUzMaKRROhxU8/Er3oxfTnKmiEXoz06ajTn1Cs1AZTzooubegvkoV643P3PDlndH/vFfH05KM4W/+JAF0rSdDODUl3plffGPNLYBTOroRLqMkX6RH62xM27O+m0oFYTduX2gM2KC8Y+m/33Y+UGww=='
 })
 /**
  * File-manager component
  */
 export default {
+  props: {
+    datasetname: {
+      type: String,
+      default: '',
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       dropzoneOptions: {
@@ -24,36 +38,49 @@ export default {
         headers: { "My-Awesome-Header": "header value" }
       },
       viewUpload: false,
+      objStream: [],
+      myString: '',
+      myJson: {},
+      bucketname: this.datasetname,
     };
   },
-  components: {vueDropzone: vue2Dropzone},
+  components: {vueDropzone: vue2Dropzone, FileTemplate},
+  mounted() {
+    this.listFiles();
+  },
   methods: {
-    createBucket(){
-      // Make a bucket called mybucket.
-      s3Client.makeBucket('mybucket', 'us-east-1', function(err){
-        if (err) return console.log('Error creating bucket.', err)
-        console.log('Bucket created successfully in "us-east-1".')
-      })
-
-      // 列举某一bucket中的文件
-      // var stream = s3Client.listObjects('newbucket','', true)
-      // stream.on('data', function(obj) { console.log(obj) } )
-      // stream.on('error', function(err) { console.log(err) } )
-      // return this.$request.put('ip');
-      // bucket列表
-      // s3Client.listBuckets(function(err, buckets) {
-      //   if (err) return console.log(err)
-      //   console.log('buckets :', buckets)
+    listFiles(){
+      // 创建一个新的bucket
+      // s3Client.makeBucket('mybucket', 'us-east-1', function(err){
+      //   if (err) return console.log('Error creating bucket.', err)
+      //   console.log('Bucket created successfully in "us-east-1".')
       // })
 
-
+      // 列举某一bucket中的文件对象
+      this.objStream = [];
+      var stream = s3Client.listObjectsV2(this.datasetname,'', true,'');
+      stream.on('data', data => {
+        this.objStream.push(data);
+        console.log(this.objStream);
+      })
     },
-    uploadFile() {
+    // 展示上传文件的组件
+    touploadFile() {
       this.viewUpload = true
     },
+    // 返回查看文件列表
     returnViewFile() {
       this.viewUpload = false
-    }
+    },
+    // 上传文件
+    uploadFile() {
+      var buffer = 'Hello World'
+      s3Client.putObject(this.bucketname, 'hello-file', buffer, function(err, etag) {
+        return console.log(err, etag) // err should be null
+      })
+      this.listFiles();
+      this.viewUpload = false
+    },
   },
 };
 </script>
@@ -70,15 +97,16 @@ export default {
                   <div class="row mb-3">
                     <div class="col-xl-3 col-sm-6">
                       <div class="mt-2">
-                        <h5>文件浏览</h5>
+                        <!-- <h5>文件浏览</h5> -->
+                        <h5>{{datasetname}}</h5>
                       </div>
                     </div>
                     <div class="col-xl-9 col-sm-6">
                       <form
                         class="mt-4 mt-sm-0 float-sm-end d-flex align-items-center"
                       > 
-                        <!-- <div class="btn btn-primary mb-2" title="上传文件" @click="createBucket">
-                          创建bucket
+                        <!-- <div class="btn btn-primary mb-2" title="上传文件" @click="listFiles">
+                          测试
                         </div> -->
                         <div class="search-box mb-2 me-2">
                           <div class="position-relative">
@@ -91,7 +119,7 @@ export default {
                           </div>
                         </div>
                         <div class="btn btn-primary mb-2" title="上传文件">
-                          <i class="bx bx-upload " style="font-size: 15px;" @click="uploadFile"></i>
+                          <i class="bx bx-upload " style="font-size: 15px;" @click="touploadFile"></i>
                         </div>
                       </form>
                     </div>
@@ -101,347 +129,7 @@ export default {
                 <!-- My File内容，文件浏览 -->
                 <div>
                   <div class="row">
-                    <div class="col-xl-4 col-sm-6">
-                      <div class="card shadow-none border">
-                        <div class="card-body p-3">
-                          <div class="">
-                            <div class="float-end ms-2">
-                              <b-dropdown
-                                toggle-class="font-size-16 text-muted p-0"
-                                menu-class="dropdown-menu-end"
-                                class="mb-2"
-                                variant="white"
-                                right
-                              >
-                                <template #button-content>
-                                  <i class="mdi mdi-dots-horizontal"></i>
-                                </template>
-
-                                <b-dropdown-item href="#">Open</b-dropdown-item>
-                                <b-dropdown-item href="#">Edit</b-dropdown-item>
-                                <b-dropdown-item href="#"
-                                  >Rename</b-dropdown-item
-                                >
-                                <b-dropdown-divider></b-dropdown-divider>
-                                <b-dropdown-item href="#"
-                                  >Remove</b-dropdown-item
-                                >
-                              </b-dropdown>
-                            </div>
-                            <div class="avatar-xs me-3 mb-3">
-                              <div class="avatar-title bg-transparent rounded">
-                                <i
-                                  class="bx bxs-folder font-size-24 text-warning"
-                                ></i>
-                              </div>
-                            </div>
-                            <div class="d-flex">
-                              <div class="overflow-hidden me-auto">
-                                <h5 class="font-size-14 text-truncate mb-1">
-                                  <a
-                                    href="javascript: void(0);"
-                                    class="text-body"
-                                    >Design</a
-                                  >
-                                </h5>
-                                <p class="text-muted text-truncate mb-0">
-                                  12 Files
-                                </p>
-                              </div>
-                              <div class="align-self-end ms-2">
-                                <p class="text-muted mb-0">6GB</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- end col -->
-
-                    <div class="col-xl-4 col-sm-6">
-                      <div class="card shadow-none border">
-                        <div class="card-body p-3">
-                          <div class="">
-                            <div class="float-end ms-2">
-                              <b-dropdown
-                                toggle-class="font-size-16 text-muted p-0"
-                                menu-class="dropdown-menu-end"
-                                class="mb-2"
-                                variant="white"
-                                right
-                              >
-                                <template #button-content>
-                                  <i class="mdi mdi-dots-horizontal"></i>
-                                </template>
-
-                                <b-dropdown-item href="#">Open</b-dropdown-item>
-                                <b-dropdown-item href="#">Edit</b-dropdown-item>
-                                <b-dropdown-item href="#"
-                                  >Rename</b-dropdown-item
-                                >
-                                <b-dropdown-divider></b-dropdown-divider>
-                                <b-dropdown-item href="#"
-                                  >Remove</b-dropdown-item
-                                >
-                              </b-dropdown>
-                            </div>
-                            <div class="avatar-xs me-3 mb-3">
-                              <div class="avatar-title bg-transparent rounded">
-                                <i
-                                  class="bx bxs-folder font-size-24 text-warning"
-                                ></i>
-                              </div>
-                            </div>
-                            <div class="d-flex">
-                              <div class="overflow-hidden me-auto">
-                                <h5 class="font-size-14 text-truncate mb-1">
-                                  <a
-                                    href="javascript: void(0);"
-                                    class="text-body"
-                                    >Development</a
-                                  >
-                                </h5>
-                                <p class="text-muted text-truncate mb-0">
-                                  20 Files
-                                </p>
-                              </div>
-                              <div class="align-self-end ms-2">
-                                <p class="text-muted mb-0">8GB</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- end col -->
-
-                    <div class="col-xl-4 col-sm-6">
-                      <div class="card shadow-none border">
-                        <div class="card-body p-3">
-                          <div class="">
-                            <div class="float-end ms-2">
-                              <b-dropdown
-                                toggle-class="font-size-16 text-muted p-0"
-                                menu-class="dropdown-menu-end"
-                                class="mb-2"
-                                variant="white"
-                                right
-                              >
-                                <template #button-content>
-                                  <i class="mdi mdi-dots-horizontal"></i>
-                                </template>
-
-                                <b-dropdown-item href="#">Open</b-dropdown-item>
-                                <b-dropdown-item href="#">Edit</b-dropdown-item>
-                                <b-dropdown-item href="#"
-                                  >Rename</b-dropdown-item
-                                >
-                                <b-dropdown-divider></b-dropdown-divider>
-                                <b-dropdown-item href="#"
-                                  >Remove</b-dropdown-item
-                                >
-                              </b-dropdown>
-                            </div>
-                            <div class="avatar-xs me-3 mb-3">
-                              <div class="avatar-title bg-transparent rounded">
-                                <i
-                                  class="bx bxs-folder font-size-24 text-warning"
-                                ></i>
-                              </div>
-                            </div>
-                            <div class="d-flex">
-                              <div class="overflow-hidden me-auto">
-                                <h5 class="font-size-14 text-truncate mb-1">
-                                  <a
-                                    href="javascript: void(0);"
-                                    class="text-body"
-                                    >Project A</a
-                                  >
-                                </h5>
-                                <p class="text-muted text-truncate mb-0">
-                                  06 Files
-                                </p>
-                              </div>
-                              <div class="align-self-end ms-2">
-                                <p class="text-muted mb-0">2GB</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- end col -->
-
-                    <div class="col-xl-4 col-sm-6">
-                      <div class="card shadow-none border">
-                        <div class="card-body p-3">
-                          <div class="">
-                            <div class="float-end ms-2">
-                              <b-dropdown
-                                toggle-class="font-size-16 text-muted p-0"
-                                menu-class="dropdown-menu-end"
-                                class="mb-2"
-                                variant="white"
-                                right
-                              >
-                                <template #button-content>
-                                  <i class="mdi mdi-dots-horizontal"></i>
-                                </template>
-
-                                <b-dropdown-item href="#">Open</b-dropdown-item>
-                                <b-dropdown-item href="#">Edit</b-dropdown-item>
-                                <b-dropdown-item href="#"
-                                  >Rename</b-dropdown-item
-                                >
-                                <b-dropdown-divider></b-dropdown-divider>
-                                <b-dropdown-item href="#"
-                                  >Remove</b-dropdown-item
-                                >
-                              </b-dropdown>
-                            </div>
-                            <div class="avatar-xs me-3 mb-3">
-                              <div class="avatar-title bg-transparent rounded">
-                                <i
-                                  class="bx bxs-folder font-size-24 text-warning"
-                                ></i>
-                              </div>
-                            </div>
-                            <div class="d-flex">
-                              <div class="overflow-hidden me-auto">
-                                <h5 class="font-size-14 text-truncate mb-1">
-                                  <a
-                                    href="javascript: void(0);"
-                                    class="text-body"
-                                    >Admin</a
-                                  >
-                                </h5>
-                                <p class="text-muted text-truncate mb-0">
-                                  08 Files
-                                </p>
-                              </div>
-                              <div class="align-self-end ms-2">
-                                <p class="text-muted mb-0">4GB</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- end col -->
-
-                    <div class="col-xl-4 col-sm-6">
-                      <div class="card shadow-none border">
-                        <div class="card-body p-3">
-                          <div class="">
-                            <div class="float-end ms-2">
-                              <b-dropdown
-                                toggle-class="font-size-16 text-muted p-0"
-                                menu-class="dropdown-menu-end"
-                                class="mb-2"
-                                variant="white"
-                                right
-                              >
-                                <template #button-content>
-                                  <i class="mdi mdi-dots-horizontal"></i>
-                                </template>
-
-                                <b-dropdown-item href="#">Open</b-dropdown-item>
-                                <b-dropdown-item href="#">Edit</b-dropdown-item>
-                                <b-dropdown-item href="#"
-                                  >Rename</b-dropdown-item
-                                >
-                                <b-dropdown-divider></b-dropdown-divider>
-                                <b-dropdown-item href="#"
-                                  >Remove</b-dropdown-item
-                                >
-                              </b-dropdown>
-                            </div>
-                            <div class="avatar-xs me-3 mb-3">
-                              <div class="avatar-title bg-transparent rounded">
-                                <i
-                                  class="bx bxs-folder font-size-24 text-warning"
-                                ></i>
-                              </div>
-                            </div>
-                            <div class="d-flex">
-                              <div class="overflow-hidden me-auto">
-                                <h5 class="font-size-14 text-truncate mb-1">
-                                  <a
-                                    href="javascript: void(0);"
-                                    class="text-body"
-                                    >Sketch Design</a
-                                  >
-                                </h5>
-                                <p class="text-muted text-truncate mb-0">
-                                  12 Files
-                                </p>
-                              </div>
-                              <div class="align-self-end ms-2">
-                                <p class="text-muted mb-0">6GB</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- end col -->
-
-                    <div class="col-xl-4 col-sm-6">
-                      <div class="card shadow-none border">
-                        <div class="card-body p-3">
-                          <div class="">
-                            <div class="float-end ms-2">
-                              <b-dropdown
-                                menu-class="dropdown-menu-end"
-                                toggle-class="font-size-16 text-muted p-0"
-                                class="mb-2"
-                                variant="white"
-                                right
-                              >
-                                <template #button-content>
-                                  <i class="mdi mdi-dots-horizontal"></i>
-                                </template>
-
-                                <b-dropdown-item href="#">Open</b-dropdown-item>
-                                <b-dropdown-item href="#">Edit</b-dropdown-item>
-                                <b-dropdown-item href="#"
-                                  >Rename</b-dropdown-item
-                                >
-                                <b-dropdown-divider></b-dropdown-divider>
-                                <b-dropdown-item href="#"
-                                  >Remove</b-dropdown-item
-                                >
-                              </b-dropdown>
-                            </div>
-                            <div class="avatar-xs me-3 mb-3">
-                              <div class="avatar-title bg-transparent rounded">
-                                <i
-                                  class="bx bxs-folder font-size-24 text-warning"
-                                ></i>
-                              </div>
-                            </div>
-                            <div class="d-flex">
-                              <div class="overflow-hidden me-auto">
-                                <h5 class="font-size-14 text-truncate mb-1">
-                                  <a
-                                    href="javascript: void(0);"
-                                    class="text-body"
-                                    >Applications</a
-                                  >
-                                </h5>
-                                <p class="text-muted text-truncate mb-0">
-                                  20 Files
-                                </p>
-                              </div>
-                              <div class="align-self-end ms-2">
-                                <p class="text-muted mb-0">8GB</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- end col -->
+                    <FileTemplate  v-for="item in objStream" :key="item.id" :file="item" :bucket="datasetname" :fileList="objStream" />
                   </div>
                   <!-- end row -->
                 </div>
@@ -485,7 +173,7 @@ export default {
                   </div>
                   <div class="row">
                     <div class="col-lg-12 text-center">
-                      <button type="submit" class="btn btn-success me-2">上传</button>
+                      <button type="submit" class="btn btn-success me-2" @click="uploadFile">上传</button>
                       <button class="btn btn-secondary" @click="returnViewFile">取消</button>
                     </div>
                   </div>

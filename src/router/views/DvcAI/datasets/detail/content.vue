@@ -44,7 +44,7 @@ export default {
         </span>
         <span class="d-none d-sm-inline-block">文件浏览</span>
       </template>
-      <FileManager/>
+      <FileManager :datasetname="dataset.name" :isAdmin="isAdmin"/>
     </b-tab>
   </b-tabs>
   
