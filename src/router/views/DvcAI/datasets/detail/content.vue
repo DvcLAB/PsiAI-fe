@@ -17,18 +17,28 @@ export default {
     isAdmin: {
       type: Boolean,
       default: false
-    }
+    },
   },
   data() {
     return {};
   },
+  methods: {
+    // 点击文件浏览之后，左边的内容框扩展到占全屏，用户信息放到下一行显示，也占全行,这个函数调用vuex的mutation函数来修改共享数据，因为这个布局需要改的是父组件中的class
+    switchFileManager(){
+      this.$store.commit('datasets/switchFileManager')
+    },
+    // 点击基本信息时，页面布局恢复为用户信息占4/12,数据集基本信息占8/12
+    switchBaseMsg() {
+      this.$store.commit('datasets/switchBaseMsg')
+    }
+  }
 };
 </script>
 <template>
 <div class="custom-tab">
 
   <b-tabs pills fill content-class="text-muted mt-4">
-    <b-tab active class="border-0">
+    <b-tab active class="border-0" @click="switchBaseMsg">
       <template v-slot:title>
         <!-- 仅在sm尺寸的屏幕上可见，inline-block元素生成一个块元素框，它将与周围的内容一起流动，就好像它是一个单独的内联框 -->
         <span class="d-inline-block d-sm-none">
@@ -39,7 +49,7 @@ export default {
       </template>
       <Config :dataset="dataset" :isAdmin="isAdmin"/>
     </b-tab>
-    <b-tab class="border-0">
+    <b-tab class="border-0" @click="switchFileManager">
       <template v-slot:title>
         <span class="d-inline-block d-sm-none">
           <i class="bx bx-file"></i>

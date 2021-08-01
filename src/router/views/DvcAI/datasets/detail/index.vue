@@ -108,12 +108,12 @@ export default {
     <LoaderContainer :loading="loadingState">
       <div class="row font-size-14">
         
-        <div class="col-12 col-md-8">
+        <div class="col-12" :class="this.$store.state.datasets.contentWidth">
           <Header :dataset="dataset"/>
           <Content :dataset="dataset" :isAdmin="isAdmin"/>
         </div>
 
-        <div class="col-12 col-md-4">
+        <div class="col-12" :class="this.$store.state.datasets.sideBarWidth">
           <Rightsidebar :dataset="dataset" :isAdmin="isAdmin" @changeLoading="onLoading" />
         </div>
 

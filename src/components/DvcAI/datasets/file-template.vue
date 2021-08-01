@@ -7,8 +7,8 @@ var Minio = require('minio')
  
 var s3Client = new Minio.Client({
     endPoint:  's3.dvclab.com',
-    accessKey: '7AU2ABLFK9VB2CWZB1JM',
-    secretKey: 'WNS7mbQPqdb4l7GJsBcOtOWds5SnesvyleuKIoNl'
+    accessKey: 'HNGU1VB7FDD4WYQ537BD',
+    secretKey: 'gDaPHd6CwgDYUafDtE3rLgnz7CAJ1wxHu23DrNhT'
     // accessKey: '8cNAQJQvcO3x0TUOpyu',
     // secretKey: 'X681H4EC8EUKWJ9UCA0I73S9EJTJGV4ZS0V9BFV'
     // secretKey: 'W8J0Y8GJXOHC26NT3M24E8PHEK2D1OZ1WU1OFUX',
@@ -107,6 +107,44 @@ export default {
             });
             // this.$parent.listFiles();
         },
+
+        // 下载文件
+        downLoadFile(bucket,fileName,suffix) {
+            // var size = 0
+            s3Client.getObject(bucket, fileName, function(err, dataStream) {
+                if (err) {
+                    return console.log(err)
+                }
+                const filename = fileName;
+                const contentType = suffix;
+                dataStream.on('data', data => {
+                    // this.objStream.push(data);
+                    //创建a标签
+                    let linkElement = document.createElement("a");
+                    //创建 blob对象 第一个参数 response.data是代表后端返回的文件流  ，第二个参数设置文件类型
+                    let blob = new Blob([data], { type: contentType });
+                    //生成生成下载链接  这个链接放在a标签上是直接下载，放在img上可以直接显示图片问价，视频同理
+                    const url = window.URL.createObjectURL(blob);
+                    linkElement.setAttribute("href", url);
+                    linkElement.setAttribute("target", '_blank');
+                    linkElement.setAttribute("download", filename);
+                    //模拟点击a标签 
+                    if (typeof MouseEvent == "function") { 
+                        var event = new MouseEvent("click", { 
+                            view: window, bubbles: true, cancelable: false 
+                        }); 
+                        linkElement.dispatchEvent(event);
+                    } 
+                })
+                
+                // dataStream.on('end', function() {
+                //     console.log('End. Total size = ' + size)
+                // })
+                dataStream.on('error', function(err) {
+                    console.log(err)
+                })
+            })
+        }
     }
 }
 </script>
@@ -126,7 +164,7 @@ export default {
                             <template #button-content>
                                 <i class="mdi mdi-dots-horizontal"></i>
                             </template>
-                            <b-dropdown-item href="#">下载</b-dropdown-item>
+                            <b-dropdown-item href="#" @click="downLoadFile(bucket,file.name,file.name.substring(file.name.lastIndexOf('.') + 1))">下载</b-dropdown-item>
                             <!-- <b-dropdown-divider></b-dropdown-divider> -->
                             <b-dropdown-item href="#" @click="removeFile">删除</b-dropdown-item>
                         </b-dropdown>

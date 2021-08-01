@@ -9,8 +9,8 @@ var Minio = require('minio')
  
 var s3Client = new Minio.Client({
     endPoint:  's3.dvclab.com',
-    accessKey: '7AU2ABLFK9VB2CWZB1JM',
-    secretKey: 'WNS7mbQPqdb4l7GJsBcOtOWds5SnesvyleuKIoNl'
+    accessKey: 'HNGU1VB7FDD4WYQ537BD',
+    secretKey: 'gDaPHd6CwgDYUafDtE3rLgnz7CAJ1wxHu23DrNhT'
     // secretKey: 'YYM1XF9VQMI3P90F0Q0RD6122GVEZJXXDTZMMII',
     // accessKey: 'IugELbZbxF9YTFgRPBr' ,
     // sessionToken: '2ISrrBv9aP2+pIs+Jj8kkyRUTpCIUP78U9Ge5I2WBiM+gpbAtLu2VCJB1vLdogPHSuLIlG9LEMp757xs1Iwy2c+1JWqNgImT2rV4XCdZx+4CplKpYfeEQNDmzuxdzmX5oFT1eL5NM32bGv0V8n5/75tzsBM5LuosFMrt4wHegH7JdK/m3TDhnSqcVE6uoM6ddNPhghP+8dtMj7sVK3dfT+LAW5YVbPITHjVnX3JSmY1Oc32ZHDTRR8WYpVwUgPFRMCB317AZAfcahDGahWXAWeq++JKtJaPtDno2rmDvDCAyS6/wB3FhaIGvZoylbjHrlSUzMaKRROhxU8/Er3oxfTnKmiEXoz06ajTn1Cs1AZTzooubegvkoV643P3PDlndH/vFfH05KM4W/+JAF0rSdDODUl3plffGPNLYBTOroRLqMkX6RH62xM27O+m0oFYTduX2gM2KC8Y+m/33Y+UGww=='
@@ -32,10 +32,14 @@ export default {
   data() {
     return {
       dropzoneOptions: {
-        url: "https://httpbin.org/post",
+        url: "",
         thumbnailWidth: 150,
         maxFilesize: 0.5,
-        headers: { "My-Awesome-Header": "header value" }
+        headers: { "My-Awesome-Header": "header value" },
+        chunking: true,
+        chunkSize: 500, // Bytes
+        thumbnailHeight: 150,
+        addRemoveLinks: true
       },
       viewUpload: false,
       objStream: [],
@@ -73,17 +77,67 @@ export default {
       this.viewUpload = false
     },
     // 上传文件
-    uploadFile() {
-      var buffer = 'Hello World'
-      s3Client.putObject(this.bucketname, 'hello-file', buffer, function(err, etag) {
-        return console.log(err, etag) // err should be null
-      })
-      this.objStream = [];
-      this.listFiles();
-      this.viewUpload = false
+    uploadFilee() {
+      // expires in a day.
+      var files = document.querySelector("#dropzone").files;
+      console.log(files);
     },
+      // `upload` iterates through all files selected and invokes a helper function called `retrieveNewURL`.
+    upload(bucket) {
+          // Get selected files from the input element.
+          var files = document.querySelector("#selector").files;
+          console.log(files);
+          for (var i = 0; i < files.length; i++) {
+              var file = files[i];
+              // Retrieve a URL from our server.
+              this.retrieveNewURL(bucket, file, (file, url) => {
+                  // Upload the file to the server.
+                  this.uploadFile(file, url);
+              });
+          }
+    },
+    retrieveNewURLL(bucket, file) {
+        var fileName = file.name;
+        s3Client.presignedPutObject(bucket,fileName, 24*60*60, function(err, presignedUrl) {
+          if (err) return console.log(err);
+          this.dropzoneOptions.url = presignedUrl;
+          //return presignedUrl;
+          // url = presignedUrl
+        });
+    },
+
+    // `retrieveNewURL` accepts the name of the current file and invokes the `/presignedUrl` endpoint to
+    // generate a pre-signed URL for use in uploading that file: 
+    retrieveNewURL(bucket, file, cb) {
+        var fileName = file.name;
+        s3Client.presignedPutObject(bucket,fileName, 24*60*60, function(err, presignedUrl) {
+          if (err) return console.log(err)
+          cb(file, presignedUrl);
+          // url = presignedUrl
+        });
+    },
+    // ``uploadFile` accepts the current filename and the pre-signed URL. It then uses `Fetch API`
+    // to upload this file to S3 at `play.min.io:9000` using the URL:
+    uploadFile(file, url) {
+        // if (document.querySelector('#status').innerText === 'No uploads') {
+        //     document.querySelector('#status').innerHTML = '';
+        // }
+        fetch(url, {
+            method: 'PUT',
+            body: file
+        }).then(() => {
+            // If multiple files are uploaded, append upload status on the next line.
+            // document.querySelector('#status').innerHTML += `<br>Uploaded ${file.name}.`;
+            this.objStream = [];
+            this.listFiles();
+            this.viewUpload = false
+        }).catch((e) => {
+            console.error(e);
+        });
+    }
   },
-};
+  
+}
 </script>
 
 <template>
@@ -157,13 +211,16 @@ export default {
                 </div>
                 <div>
                   <div class="mb-4">
-                    <!-- <label class="col-form-label col-lg-2">上传文件</label> -->
                     <div>
-                      <vue-dropzone
+                      <!-- <vue-dropzone
                         id="dropzone"
                         ref="myVueDropzone"
                         :use-custom-slot="true"
                         :options="dropzoneOptions"
+                        @vdropzone-file-added="retrieveNewURLL(bucket, file)"
+                      > -->
+                      <vue-dropzone
+                      :use-custom-slot="true"
                       >
                         <div class="dropzone-custom-content">
                           <i class="display-4 text-muted bx bxs-cloud-upload"></i>
@@ -174,13 +231,17 @@ export default {
                   </div>
                   <div class="row">
                     <div class="col-lg-12 text-center">
-                      <button type="submit" class="btn btn-success me-2" @click="uploadFile">上传</button>
+                      <button type="submit" class="btn btn-success me-2" @click="uploadFilee">上传</button>
                       <button class="btn btn-secondary" @click="returnViewFile">取消</button>
                     </div>
                   </div>
                   
                 </div>
-
+                <div class="mt-3">
+                  <input type="file" id="selector" multiple>
+                  <button @click="upload(datasetname)" class="btn btn-secondary">Upload</button>
+                  <!-- <div id="status">No uploads</div> -->
+                </div>
               </div>
             </div>
             <!-- end card -->
