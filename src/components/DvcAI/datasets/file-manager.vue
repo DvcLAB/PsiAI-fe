@@ -62,7 +62,7 @@ export default {
 
       // 列举某一bucket中的文件对象
       this.objStream = [];
-      var stream = s3Client.listObjectsV2(this.datasetname,'', true,'');
+      var stream = s3Client.extensions.listObjectsV2WithMetadata(this.datasetname,'', false,'');
       stream.on('data', data => {
         this.objStream.push(data);
         console.log(this.objStream);
@@ -78,7 +78,7 @@ export default {
     },
     // 上传文件
     uploadFilee() {
-      // expires in a day.
+      // expires in a day.q
       var files = document.querySelector("#dropzone").files;
       console.log(files);
     },

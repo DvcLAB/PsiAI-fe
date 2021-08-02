@@ -22,6 +22,10 @@ export default {
   data() {
     return {};
   },
+  mounted() {
+    this.switchBaseMsg();
+    this.clearPrefix();
+  },
   methods: {
     // 点击文件浏览之后，左边的内容框扩展到占全屏，用户信息放到下一行显示，也占全行,这个函数调用vuex的mutation函数来修改共享数据，因为这个布局需要改的是父组件中的class
     switchFileManager(){
@@ -30,6 +34,10 @@ export default {
     // 点击基本信息时，页面布局恢复为用户信息占4/12,数据集基本信息占8/12
     switchBaseMsg() {
       this.$store.commit('datasets/switchBaseMsg')
+    },
+    // 每次刷新content组件时，filemanager组件的prefix需要清空，从而回到根目录下
+    clearPrefix() {
+      this.$store.commit('datasets/clearPrefix')
     }
   }
 };
@@ -58,14 +66,14 @@ export default {
       </template>
       <FileManager :datasetname="dataset.name" :isAdmin="isAdmin"/>
     </b-tab>
-    <b-tab class="border-0">
+    <b-tab class="border-0" @click="switchFileManager">
       <template v-slot:title>
         <span class="d-inline-block d-sm-none">
           <i class="bx bx-file"></i>
         </span>
         <span class="d-none d-sm-inline-block">文件浏览</span>
       </template>
-      <FileManagerList :datasetname="dataset.name" :isAdmin="isAdmin"/>
+      <FileManagerList :datasetname="dataset.name" :isAdmin="isAdmin" :key="$store.state.datasets.prefix"/>
     </b-tab>
   </b-tabs>
   

@@ -8,12 +8,9 @@ var Minio = require('minio')
  
  
 var s3Client = new Minio.Client({
-    endPoint:  's3.dvclab.com',
-    accessKey: '7AU2ABLFK9VB2CWZB1JM',
-    secretKey: 'WNS7mbQPqdb4l7GJsBcOtOWds5SnesvyleuKIoNl'
-    // secretKey: 'YYM1XF9VQMI3P90F0Q0RD6122GVEZJXXDTZMMII',
-    // accessKey: 'IugELbZbxF9YTFgRPBr' ,
-    // sessionToken: '2ISrrBv9aP2+pIs+Jj8kkyRUTpCIUP78U9Ge5I2WBiM+gpbAtLu2VCJB1vLdogPHSuLIlG9LEMp757xs1Iwy2c+1JWqNgImT2rV4XCdZx+4CplKpYfeEQNDmzuxdzmX5oFT1eL5NM32bGv0V8n5/75tzsBM5LuosFMrt4wHegH7JdK/m3TDhnSqcVE6uoM6ddNPhghP+8dtMj7sVK3dfT+LAW5YVbPITHjVnX3JSmY1Oc32ZHDTRR8WYpVwUgPFRMCB317AZAfcahDGahWXAWeq++JKtJaPtDno2rmDvDCAyS6/wB3FhaIGvZoylbjHrlSUzMaKRROhxU8/Er3oxfTnKmiEXoz06ajTn1Cs1AZTzooubegvkoV643P3PDlndH/vFfH05KM4W/+JAF0rSdDODUl3plffGPNLYBTOroRLqMkX6RH62xM27O+m0oFYTduX2gM2KC8Y+m/33Y+UGww=='
+  endPoint:  's3.dvclab.com',
+  accessKey: 'HNGU1VB7FDD4WYQ537BD',
+  secretKey: 'gDaPHd6CwgDYUafDtE3rLgnz7CAJ1wxHu23DrNhT'
 })
 /**
  * File-manager component
@@ -42,6 +39,8 @@ export default {
       myString: '',
       myJson: {},
       bucketname: this.datasetname,
+      //数据集文件浏览部分的面包屑导航
+      items: this.$store.state.datasets.items
     };
   },
   components: {vueDropzone: vue2Dropzone, FileTemplateList},
@@ -50,19 +49,13 @@ export default {
   },
   methods: {
     listFiles(){
-      // 创建一个新的bucket
-      // s3Client.makeBucket('mybucket', 'us-east-1', function(err){
-      //   if (err) return console.log('Error creating bucket.', err)
-      //   console.log('Bucket created successfully in "us-east-1".')
-      // })
-
       // 列举某一bucket中的文件对象
       this.objStream = [];
-      var stream = s3Client.listObjectsV2(this.datasetname,'', true,'');
+      var stream = s3Client.extensions.listObjectsV2WithMetadata(this.datasetname,this.$store.state.datasets.prefix, false,'');
       stream.on('data', data => {
         this.objStream.push(data);
-        console.log(this.objStream);
       })
+      return this.objStream;
     },
     // 展示上传文件的组件
     touploadFile() {
@@ -96,13 +89,15 @@ export default {
               <div class="card-body" v-if="!viewUpload">
                 <div>
                   <div class="row mb-3">
-                    <div class="col-xl-3 col-sm-6">
-                      <div class="mt-2">
-                        <!-- <h5>文件浏览</h5> -->
-                        <h5>{{datasetname}}</h5>
+                    <div class="col-xl-6 col-sm-6">
+                      <div class="mt-2 page-title-left">
+                        <h5>
+                          <a @click="$store.commit('datasets/clearPrefix')">{{datasetname}}</a>
+                          <a v-for="folderName in items" :key="folderName" @click="$store.commit('datasets/skipToFolder',folderName)"><i class="bx bx-chevron-right" style="font-size: 15px;vertical-align: middle;"></i>{{folderName}}</a>
+                        </h5>
                       </div>
                     </div>
-                    <div class="col-xl-9 col-sm-6">
+                    <div class="col-xl-6 col-sm-6">
                       <form
                         class="mt-4 mt-sm-0 float-sm-end d-flex align-items-center"
                       > 
@@ -142,7 +137,7 @@ export default {
                         </tr>
                       </thead>
                       <tbody>
-                        <FileTemplateList  v-for="item in objStream" :key="item.id" :file="item" :bucket="datasetname" :fileList="objStream" />
+                        <FileTemplateList v-for="item in objStream" :key="item.id" :file="item" :bucket="datasetname" :fileList="objStream" />
                       </tbody>
                     </table>
                   </div>
@@ -204,7 +199,6 @@ export default {
         </div>
         
       </div>
-
     </div>
     <!-- end row -->
 </template>

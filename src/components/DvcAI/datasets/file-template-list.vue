@@ -7,14 +7,10 @@ var Minio = require('minio')
  
 var s3Client = new Minio.Client({
     endPoint:  's3.dvclab.com',
-    accessKey: '7AU2ABLFK9VB2CWZB1JM',
-    secretKey: 'WNS7mbQPqdb4l7GJsBcOtOWds5SnesvyleuKIoNl'
-    // accessKey: '8cNAQJQvcO3x0TUOpyu',
-    // secretKey: 'X681H4EC8EUKWJ9UCA0I73S9EJTJGV4ZS0V9BFV'
-    // secretKey: 'W8J0Y8GJXOHC26NT3M24E8PHEK2D1OZ1WU1OFUX',
-    // accessKey: 'TjwE46dr5LUG4QQYWPj' ,
-    // sessionToken: 'RBjM/j4pW6IG0VbuQAkAfw+vDfTT11qjpsdAg6R+7XO6mHp7a6OwE69ZYZcQPH3vfMn3JH+oQ0YhEBXOuoi3dmr8Dq5JWCvkBcd1j1lAnKBjtMUGoaFNM5tzFAcoNH/ooLbSxIO5XwXDgwKRPaCnYKlP/c6Q3QAsr1OnN2iwNI/lPNs8z8YvNwg8VzdoKPaWr4PhctJhV26j4yk3zNU6WgttQ6B8DFzf22+pMlQ24P1TambeMLpfEge1qVCIQ/cqN4cWzKxA7Yve3cMsmC4otIPbpWO5j90P05itrPhWWUCOd6Rf758LCloRHwKUKcMmjgKybxPOGNtlmV5mn3Hv/u3YXKzM3eZpAgiaMQs1yvftpmC50ahnBVikGxCr1Fa29rNYaIHyXL4FDdFw26+eV8lRnA0Xpjg9ofHAbEVoMS3F/39AY8Tupv3eg0qTpx44AZV3GAQNFU06KOPaNzHUCA=='
+    accessKey: 'HNGU1VB7FDD4WYQ537BD',
+    secretKey: 'gDaPHd6CwgDYUafDtE3rLgnz7CAJ1wxHu23DrNhT'
 })
+
 export default {
     data() {
         return {
@@ -34,7 +30,8 @@ export default {
                     "pdf": 'mdi-file-pdf text-danger',
                     "": 'mdi mdi-folder text-warning',
                     "gz": 'mdi mdi-folder-zip text-warning',
-            }
+            },
+            viewName:'',
         }
     },
     props: {
@@ -50,6 +47,9 @@ export default {
             type: Array,
             default: () => [],
         }
+    },
+    mounted() {
+        this.getViewName();
     },
     methods: {
         // 格式化文件大小,默认单位是Byte
@@ -72,11 +72,15 @@ export default {
 
         //解析出类名
 		getSuffix(filename) {
-			// 截取路径“.”后面的字符串
-			var suffix = filename.substring(filename.lastIndexOf('.') + 1);
-            // 如果icon集合中没定义这种类型的文件的icon名，就统一用'bx bxs-file-blank'
-            this.icon_class = this.icon.hasOwnProperty(suffix) ? this.icon[suffix] : 'mdi mdi-file-document text-primary';
-            return this.icon_class;
+			if(filename) {
+                // 截取路径“.”后面的字符串
+                var suffix = filename.substring(filename.lastIndexOf('.') + 1);
+                // 如果icon集合中没定义这种类型的文件的icon名，就统一用'bx bxs-file-blank'
+                this.icon_class = this.icon.hasOwnProperty(suffix) ? this.icon[suffix] : 'mdi mdi-file-document text-primary';
+                return this.icon_class;
+            }else{
+                return 'mdi mdi-folder text-warning';
+            }
 		},
 
         // 删除文件
@@ -91,12 +95,73 @@ export default {
             this.$parent.objStream = this.$parent.objStream.filter((item) => {
                 return !this.file.name.includes(item.name)
             });
+            // this.$parent.listFiles();
         },
+
+        // 下载文件
+        downLoadFile(bucket,fileName,suffix) {
+            // var size = 0
+            s3Client.getObject(bucket, fileName, function(err, dataStream) {
+                if (err) {
+                    return console.log(err)
+                }
+                const filename = fileName;
+                const contentType = suffix;
+                dataStream.on('data', data => {
+                    // this.objStream.push(data);
+                    //创建a标签
+                    let linkElement = document.createElement("a");
+                    //创建 blob对象 第一个参数 response.data是代表后端返回的文件流  ，第二个参数设置文件类型
+                    let blob = new Blob([data], { type: contentType });
+                    //生成生成下载链接  这个链接放在a标签上是直接下载，放在img上可以直接显示图片问价，视频同理
+                    const url = window.URL.createObjectURL(blob);
+                    linkElement.setAttribute("href", url);
+                    linkElement.setAttribute("target", '_blank');
+                    linkElement.setAttribute("download", filename);
+                    //模拟点击a标签 
+                    if (typeof MouseEvent == "function") { 
+                        var event = new MouseEvent("click", { 
+                            view: window, bubbles: true, cancelable: false 
+                        }); 
+                        linkElement.dispatchEvent(event);
+                    } 
+                })
+                
+                // dataStream.on('end', function() {
+                //     console.log('End. Total size = ' + size)
+                // })
+                dataStream.on('error', function(err) {
+                    console.log(err)
+                })
+            })
+        },
+
+        // 获取树形结构中各层文件夹名
+        getViewName() {
+            // viewName = file.name ? file.name : file.prefix;
+            if(this.file.name) {
+                this.viewName = this.file.name.substring(this.file.name.lastIndexOf('/') + 1);
+            }else {
+                this.viewName = this.file.prefix.replace(this.$store.state.datasets.prefix,'');
+                this.viewName = this.viewName.replace('/','');
+            }
+        },
+
+        //双击文件夹，进入下一级视图
+        enterFolder() {
+            if(!this.file.name) {
+                // 如果这个元素不是文件而是一个文件夹，双击才进入下一级
+                this.$store.commit('datasets/enterFolder',this.file.prefix)
+            }else{
+                // 如果这是个文件，那么双击应该出现文件预览界面
+                
+            }
+        }
     }
 }
 </script>
 <template>
-    <tr>
+    <tr @dblclick="enterFolder">
         <td class="text-truncate">
         <a
             href="javascript: void(0);"
@@ -105,7 +170,7 @@ export default {
             class="font-size-16 align-middle me-2"
             :class="getSuffix(file.name)"
             ></i>
-            {{file.name}}</a
+            {{viewName}}</a
         >
         </td>
         <td class="text-truncate">{{ file.lastModified | moment("YYYY-MM-DD HH:mm:ss") }}</td>
@@ -121,7 +186,7 @@ export default {
             <i class="mdi mdi-dots-horizontal"></i>
             </template>
 
-            <b-dropdown-item href="#">下载</b-dropdown-item>
+            <b-dropdown-item href="#" @click="downLoadFile(bucket,file.name,file.name.substring(file.name.lastIndexOf('.') + 1))">下载</b-dropdown-item>
             <!-- <b-dropdown-divider></b-dropdown-divider> -->
             <b-dropdown-item href="#" @click="removeFile">删除</b-dropdown-item>
         </b-dropdown>

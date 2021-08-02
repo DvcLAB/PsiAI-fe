@@ -9,11 +9,6 @@ var s3Client = new Minio.Client({
     endPoint:  's3.dvclab.com',
     accessKey: 'HNGU1VB7FDD4WYQ537BD',
     secretKey: 'gDaPHd6CwgDYUafDtE3rLgnz7CAJ1wxHu23DrNhT'
-    // accessKey: '8cNAQJQvcO3x0TUOpyu',
-    // secretKey: 'X681H4EC8EUKWJ9UCA0I73S9EJTJGV4ZS0V9BFV'
-    // secretKey: 'W8J0Y8GJXOHC26NT3M24E8PHEK2D1OZ1WU1OFUX',
-    // accessKey: 'TjwE46dr5LUG4QQYWPj' ,
-    // sessionToken: 'RBjM/j4pW6IG0VbuQAkAfw+vDfTT11qjpsdAg6R+7XO6mHp7a6OwE69ZYZcQPH3vfMn3JH+oQ0YhEBXOuoi3dmr8Dq5JWCvkBcd1j1lAnKBjtMUGoaFNM5tzFAcoNH/ooLbSxIO5XwXDgwKRPaCnYKlP/c6Q3QAsr1OnN2iwNI/lPNs8z8YvNwg8VzdoKPaWr4PhctJhV26j4yk3zNU6WgttQ6B8DFzf22+pMlQ24P1TambeMLpfEge1qVCIQ/cqN4cWzKxA7Yve3cMsmC4otIPbpWO5j90P05itrPhWWUCOd6Rf758LCloRHwKUKcMmjgKybxPOGNtlmV5mn3Hv/u3YXKzM3eZpAgiaMQs1yvftpmC50ahnBVikGxCr1Fa29rNYaIHyXL4FDdFw26+eV8lRnA0Xpjg9ofHAbEVoMS3F/39AY8Tupv3eg0qTpx44AZV3GAQNFU06KOPaNzHUCA=='
 })
 export default {
     data() {
@@ -48,7 +43,8 @@ export default {
                 "pdf": 'mdi-file-pdf text-danger',
                 "": 'mdi mdi-folder text-warning',
                 "gz": 'mdi mdi-folder-zip text-warning',
-            }
+            },
+            viewName:'',
         }
     },
     props: {
@@ -64,6 +60,9 @@ export default {
             type: Array,
             default: () => [],
         }
+    },
+    mounted() {
+        this.getViewName();
     },
     methods: {
         // 格式化文件大小,默认单位是Byte
@@ -86,11 +85,15 @@ export default {
 
         //解析出类名
 		getSuffix(filename) {
-			// 截取路径“.”后面的字符串
-			var suffix = filename.substring(filename.lastIndexOf('.') + 1);
-            // 如果icon集合中没定义这种类型的文件的icon名，就统一用'bx bxs-file-blank'
-            this.icon_class = this.icon.hasOwnProperty(suffix) ? this.icon[suffix] : 'mdi mdi-file-document text-primary';
-            return this.icon_class;
+            if(filename) {
+                // 截取路径“.”后面的字符串
+                var suffix = filename.substring(filename.lastIndexOf('.') + 1);
+                // 如果icon集合中没定义这种类型的文件的icon名，就统一用'bx bxs-file-blank'
+                this.icon_class = this.icon.hasOwnProperty(suffix) ? this.icon[suffix] : 'mdi mdi-file-document text-primary';
+                return this.icon_class;
+            }else{
+                return 'mdi mdi-folder text-warning';
+            }
 		},
 
         // 删除文件
@@ -144,12 +147,22 @@ export default {
                     console.log(err)
                 })
             })
+        },
+
+        // 获取树形结构中各层文件夹名
+        getViewName() {
+            // viewName = file.name ? file.name : file.prefix;
+            if(this.file.name) {
+                this.viewName = this.file.name.substring(this.file.name.lastIndexOf('/') + 1);
+            }else {
+                this.viewName = this.file.prefix.substring(0,this.file.prefix.indexOf('/'));
+            }
         }
     }
 }
 </script>
 <template>
-    <div class="col-xl-4 col-sm-6">
+    <div class="col-xl-3 col-sm-4">
         <div class="card shadow-none border">
             <div class="card-body p-3">
                 <div class="">
@@ -179,13 +192,17 @@ export default {
                     <div class="d-flex">
                         <div class="overflow-hidden me-auto">
                         <h5 class="font-size-14 text-truncate mb-1">
-                            <a
+                            <!-- <a
                             href="javascript: void(0);"
                             class="text-body"
                             :title="file.name"
-                            >{{file.name}}</a>
+                            >{{file.name}}</a> -->
+                            <a
+                            href="javascript: void(0);"
+                            class="text-body"
+                            >{{viewName}}</a>
                         </h5>
-                        <a class="text-muted text-truncate mb-0" @click="getSuffix(file.name)">
+                        <a class="text-muted text-truncate mb-0">
                             12 Files
                         </a>
                         </div>
