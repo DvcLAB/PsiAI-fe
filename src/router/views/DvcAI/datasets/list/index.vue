@@ -104,73 +104,51 @@ export default {
     },
 
     // 搜索
-    search(input) {
+    // search(input) {
       
-      if(!input) {
-        this.searchContent = '';
-      } else {
-        this.searchContent = input;
-      }
+    //   if(!input) {
+    //     this.searchContent = '';
+    //   } else {
+    //     this.searchContent = input;
+    //   }
 
-      let content = this.searchContent;
+    //   let content = this.searchContent;
 
-      return new Promise(resolve => {
+    //   return new Promise(resolve => {
 
-        if(this.isUrl(content)) { // 用户输入网址，则添加数据集
-          this.loadingState = true;
+    //      // 用户搜索数据集
 
-          this.getNewDatasetInfo(content).then((res) => {
-            this.isSearch = false;
-            if(res.code === 1) {
-              // 查询成功
-              this.loadingState = false;
-              return resolve([res.data]);
-            } else {
-              // 查询失败
-              this.loadingState = false;
-              return resolve([]);
-            }
-          })
-          .catch(err => {
-            console.log(err);
-            this.loadingState = false;
-            return resolve([]);
-          })
+    //       this.loadingState = true;
+    //       this.isSearch = true;
 
-        } else { // 用户搜索数据集
+    //       this.getDatasets({
+    //         params: {
+    //           q: input,
+    //           page: 1
+    //         }
+    //       })
+    //       .then((res) => {
+    //         console.log(res)
+    //         if(res.code === 1) {
+    //           this.datasets = res.data;
+    //           this.meta = res._meta;
+    //           this.curPage = res._meta.page;
+    //           this.curTotal = this.datasets.length;
+    //           this.loadingState = false;
+    //           return resolve(res.data);
+    //         } else {
+    //           this.loadingState = false;
+    //           return resolve([]);
+    //         }
+    //       })
+    //       .catch((err) => {
+    //         console.log(err);
+    //         this.loadingState = false;
+    //         return resolve([]);
+    //       })
 
-          this.loadingState = true;
-          this.isSearch = true;
-
-          this.getDatasets({
-            params: {
-              q: input,
-              page: 1
-            }
-          })
-          .then((res) => {
-            console.log(res)
-            if(res.code === 1) {
-              this.datasets = res.data;
-              this.meta = res._meta;
-              this.curPage = res._meta.page;
-              this.curTotal = this.datasets.length;
-              this.loadingState = false;
-              return resolve(res.data);
-            } else {
-              this.loadingState = false;
-              return resolve([]);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            this.loadingState = false;
-            return resolve([]);
-          })
-
-        }
-      })
-    },
+    //     })
+    //   },
     // 选择搜索内容，input显示内容
     getResultValue(result) {
       if(this.isSearch) {
