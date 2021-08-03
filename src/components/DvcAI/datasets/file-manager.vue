@@ -127,9 +127,7 @@ export default {
         this.retrieveNewURL(bucket, file, (file, url) => {
             // Upload the file to the server.
           this.$refs.myVueDropzone.dropzone.options.url = url;
-          console.log('111111111111111')
           this.$refs.myVueDropzone.processQueue();
-          console.log("222222222222")
         })
       }
     },
@@ -206,7 +204,7 @@ export default {
                 </div>
                 <div class="mt-3">
                   <div class="file-upload">
-                    <div class="file-upload-text">Add 新增</div>
+                    <div class="btn btn-success me-2">选择文件</div>
                     <input name="upfile" class="file-upload-input" id="selecto"  type="file" multiple>
                     <!-- <input type="file" id="selector" multiple> -->
                   </div>
@@ -228,11 +226,11 @@ export default {
 </template>
 <style>
  .file-upload {
-        width: 60px;
+        /* width: 60px; */
         height: 26px;
         position: relative;
-        overflow: hidden;
-        border: 1px solid #0F996B ;
+        /* overflow: hidden; */
+        /* border: 1px solid #0F996B ; */
         display: inline-block;
         border-radius: 4px;
         font-size: 12px;

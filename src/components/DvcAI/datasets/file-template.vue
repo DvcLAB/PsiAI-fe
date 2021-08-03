@@ -45,6 +45,7 @@ export default {
                 "gz": 'mdi mdi-folder-zip text-warning',
             },
             viewName:'',
+            show:true
         }
     },
     props: {
@@ -98,16 +99,17 @@ export default {
 
         // 删除文件
         removeFile() {
+            // this.$parent.objStream = this.$parent.objStream.filter((item) => {
+            //     return !this.file.name.includes(item.name)
+            // });
             // 删除bucket中的一个文件对象
-            this.$parent.objStream = this.$parent.objStream.filter((item) => {
-                return !this.file.name.includes(item.name)
-            });
             s3Client.removeObject(this.bucket, this.file.name, function(err) {
               if (err) {
                 return console.log('Unable to remove object', err)
               }
               console.log('Removed the object')
             });
+            this.show = false
         },
 
         // 下载文件
@@ -161,7 +163,7 @@ export default {
 }
 </script>
 <template>
-    <div class="col-xl-3 col-sm-4">
+    <div class="col-xl-3 col-sm-4" v-if="show">
         <div class="card shadow-none border">
             <div class="card-body p-3">
                 <div class="">
