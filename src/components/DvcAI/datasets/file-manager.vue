@@ -1,6 +1,6 @@
 <script>
 import vue2Dropzone from "vue2-dropzone";
-import FileTemplate from "./file-template.vue"
+import FileUpdate from "./file-manager-update.vue"
 var Minio = require('minio')
  
 // Instantiate the minio client with the endpoint
@@ -32,57 +32,40 @@ export default {
   data() {
     return {
       dropzoneOptions: {
-        url: "",
-        thumbnailWidth: 150,
-        maxFilesize: 0.5,
-        headers: { "My-Awesome-Header": "header value" },
-        chunking: true,
-        chunkSize: 500, // Bytes
-        thumbnailHeight: 150,
-        addRemoveLinks: true
+        url: 'http://localhost',
+        method: 'PUT',
+        autoProcessQueue: false,
+        // thumbnailWidth: 150,
+        // maxFilesize: 500,
+        
+
       },
-      viewUpload: false,
+      signurl: '',
       objStream: [],
-      myString: '',
-      myJson: {},
-      bucketname: this.datasetname,
     };
   },
-  components: {vueDropzone: vue2Dropzone, FileTemplate},
+  components: {vueDropzone: vue2Dropzone, FileUpdate},
   mounted() {
-    this.listFiles();
+    // this.listFiles();
   },
   methods: {
     listFiles(){
-      // 创建一个新的bucket
-      // s3Client.makeBucket('mybucket', 'us-east-1', function(err){
-      //   if (err) return console.log('Error creating bucket.', err)
-      //   console.log('Bucket created successfully in "us-east-1".')
-      // })
 
       // 列举某一bucket中的文件对象
       this.objStream = [];
       var stream = s3Client.extensions.listObjectsV2WithMetadata(this.datasetname,'', false,'');
       stream.on('data', data => {
         this.objStream.push(data);
-        console.log(this.objStream);
+        console.log("objStream:"+this.objStream);
       })
     },
-    // 展示上传文件的组件
-    touploadFile() {
-      this.viewUpload = true
-    },
+
     // 返回查看文件列表
     returnViewFile() {
-      this.viewUpload = false
+      this.$store.commit('datasets/returnViewFile')
     },
-    // 上传文件
-    uploadFilee() {
-      // expires in a day.q
-      var files = document.querySelector("#dropzone").files;
-      console.log(files);
-    },
-      // `upload` iterates through all files selected and invokes a helper function called `retrieveNewURL`.
+
+    // `upload` iterates through all files selected and invokes a helper function called `retrieveNewURL`.
     upload(bucket) {
           // Get selected files from the input element.
           var files = document.querySelector("#selector").files;
@@ -95,15 +78,6 @@ export default {
                   this.uploadFile(file, url);
               });
           }
-    },
-    retrieveNewURLL(bucket, file) {
-        var fileName = file.name;
-        s3Client.presignedPutObject(bucket,fileName, 24*60*60, function(err, presignedUrl) {
-          if (err) return console.log(err);
-          this.dropzoneOptions.url = presignedUrl;
-          //return presignedUrl;
-          // url = presignedUrl
-        });
     },
 
     // `retrieveNewURL` accepts the name of the current file and invokes the `/presignedUrl` endpoint to
@@ -134,6 +108,38 @@ export default {
         }).catch((e) => {
             console.error(e);
         });
+    },
+
+
+    // 使用vue-dropzone
+    sending(file, xhr) {
+      const _send = xhr.send
+      xhr.send = () => {
+        _send.call(xhr, file)
+      }
+    },
+    uploadFilee(bucket) {
+      var files = this.$refs.myVueDropzone.getAcceptedFiles()
+      console.log('files'+files);
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        // Retrieve a URL from our server.
+        this.retrieveNewURL(bucket, file, (file, url) => {
+            // Upload the file to the server.
+          this.$refs.myVueDropzone.dropzone.options.url = url;
+          console.log('111111111111111')
+          this.$refs.myVueDropzone.processQueue();
+          console.log("222222222222")
+        })
+      }
+    },
+
+    uploadFileee(bucket) {
+      this.uploadFilee(bucket)
+      // console.log("出来了")
+      // this.objStream = []
+      // this.listFiles()
+      // this.returnViewFile()
     }
   },
   
@@ -147,48 +153,7 @@ export default {
           <div class="w-100">
             <div class="card">
               <!-- 文件浏览 -->
-              <div class="card-body" v-if="!viewUpload">
-                <div>
-                  <div class="row mb-3">
-                    <div class="col-xl-3 col-sm-6">
-                      <div class="mt-2">
-                        <!-- <h5>文件浏览</h5> -->
-                        <h5>{{datasetname}}</h5>
-                      </div>
-                    </div>
-                    <div class="col-xl-9 col-sm-6">
-                      <form
-                        class="mt-4 mt-sm-0 float-sm-end d-flex align-items-center"
-                      > 
-                        <!-- <div class="btn btn-primary mb-2" title="上传文件" @click="listFiles">
-                          测试
-                        </div> -->
-                        <div class="search-box mb-2 me-2">
-                          <div class="position-relative">
-                            <input
-                              type="text"
-                              class="form-control bg-light border-light rounded"
-                              placeholder="搜索文件..."
-                            />
-                            <i class="bx bx-search-alt search-icon"></i>
-                          </div>
-                        </div>
-                        <div class="btn btn-primary mb-2" title="上传文件">
-                          <i class="bx bx-upload " style="font-size: 15px;" @click="touploadFile"></i>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- My File内容，文件浏览 -->
-                <div>
-                  <div class="row">
-                    <FileTemplate  v-for="item in objStream" :key="item.id" :file="item" :bucket="datasetname" :fileList="objStream" />
-                  </div>
-                  <!-- end row -->
-                </div>
-                 </div>
+              <FileUpdate v-if="!this.$store.state.datasets.viewUpload" :datasetname="datasetname" :key="this.$store.state.datasets.objStream.length"/>
               <!-- 上传文件 -->
               <div class="row card-body" v-else>
                 <div>
@@ -212,16 +177,17 @@ export default {
                 <div>
                   <div class="mb-4">
                     <div>
-                      <!-- <vue-dropzone
-                        id="dropzone"
-                        ref="myVueDropzone"
-                        :use-custom-slot="true"
-                        :options="dropzoneOptions"
-                        @vdropzone-file-added="retrieveNewURLL(bucket, file)"
-                      > -->
                       <vue-dropzone
-                      :use-custom-slot="true"
+                        ref="myVueDropzone"
+                        id="dropzone"
+                        :options="dropzoneOptions"
+                        @vdropzone-sending="sending"
+                        :use-custom-slot="true"
+                        method="PUT"
                       >
+                      <!-- <vue-dropzone
+                      :use-custom-slot="true"
+                      > -->
                         <div class="dropzone-custom-content">
                           <i class="display-4 text-muted bx bxs-cloud-upload"></i>
                           <h5>拖拽文件到此处或点击上传</h5>
@@ -231,15 +197,21 @@ export default {
                   </div>
                   <div class="row">
                     <div class="col-lg-12 text-center">
-                      <button type="submit" class="btn btn-success me-2" @click="uploadFilee">上传</button>
+                      <!-- <textarea v-model="signurl" placeholder="Signed URL" class="signedurl"></textarea> -->
+                      <button type="submit" @click="uploadFilee(datasetname)" class="btn btn-success me-2">上传</button>
                       <button class="btn btn-secondary" @click="returnViewFile">取消</button>
                     </div>
                   </div>
                   
                 </div>
                 <div class="mt-3">
-                  <input type="file" id="selector" multiple>
-                  <button @click="upload(datasetname)" class="btn btn-secondary">Upload</button>
+                  <div class="file-upload">
+                    <div class="file-upload-text">Add 新增</div>
+                    <input name="upfile" class="file-upload-input" id="selecto"  type="file" multiple>
+                    <!-- <input type="file" id="selector" multiple> -->
+                  </div>
+                  
+                  <button @click="upload(datasetname)" class="btn btn-secondary">上传</button>
                   <!-- <div id="status">No uploads</div> -->
                 </div>
               </div>
@@ -254,3 +226,36 @@ export default {
     </div>
     <!-- end row -->
 </template>
+<style>
+ .file-upload {
+        width: 60px;
+        height: 26px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #0F996B ;
+        display: inline-block;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #0F996B;
+        text-align: center;
+        line-height: 26px;
+        /* float: right; */
+        margin: 10px 0 auto auto;
+    }
+.file-upload-input {
+        background-color: transparent;
+        position: absolute;
+        width: 999px;
+        height: 999px;
+        top: -10px;
+        right: -10px;
+        cursor: pointer;
+    }
+.signedurl {
+  margin-top: 30px;
+  border: 1px solid #ccc;
+  width: 97%;
+  height: 200px;
+  padding: 10px;
+}
+</style>

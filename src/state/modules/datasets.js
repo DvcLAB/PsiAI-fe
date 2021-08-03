@@ -6,6 +6,8 @@ export const state = {
   oldPrefix: '',
   prefix: '',
   items: [],
+  objStream: [],
+  viewUpload: false
 };
 
 export const mutations = {
@@ -38,7 +40,21 @@ export const mutations = {
     // 更改面包屑导航的数组使之与prefix同步
     state.items = state.prefix.split('/')
     state.items.pop()
-  }
+  },
+  updateObjStream(state,data) {
+    state.objStream.push(data);
+  },
+  clearObjStream(state) {
+    state.objStream = [];
+  },
+  // 展示上传文件的组件
+  touploadFile(state) {
+    state.viewUpload = true
+  },
+  // 返回查看文件列表
+  returnViewFile(state) {
+    state.viewUpload = false
+  },
 };
 
 

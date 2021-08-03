@@ -75,6 +75,8 @@ export default {
       this.listFiles();
       this.viewUpload = false
     },
+
+    
   },
 };
 </script>
@@ -89,6 +91,7 @@ export default {
               <div class="card-body" v-if="!viewUpload">
                 <div>
                   <div class="row mb-3">
+                    <!-- 面包屑导航 -->
                     <div class="col-xl-6 col-sm-6">
                       <div class="mt-2 page-title-left">
                         <h5>

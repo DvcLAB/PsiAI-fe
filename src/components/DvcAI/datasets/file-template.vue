@@ -99,16 +99,15 @@ export default {
         // 删除文件
         removeFile() {
             // 删除bucket中的一个文件对象
+            this.$parent.objStream = this.$parent.objStream.filter((item) => {
+                return !this.file.name.includes(item.name)
+            });
             s3Client.removeObject(this.bucket, this.file.name, function(err) {
               if (err) {
                 return console.log('Unable to remove object', err)
               }
               console.log('Removed the object')
             });
-            this.$parent.objStream = this.$parent.objStream.filter((item) => {
-                return !this.file.name.includes(item.name)
-            });
-            // this.$parent.listFiles();
         },
 
         // 下载文件
