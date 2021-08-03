@@ -45,8 +45,8 @@ export default {
       text: null,
       flag: null,
       value: null,
-      keycloak_url: " https://auth.dvclab.com/auth/admin/DvcLAB/console/#/realms/DvcLAB/users",
-      set_account_url: "https://auth.dvclab.com/auth/realms/DvcLAB/account",
+      keycloak_url: " https://auth.33.dvc/auth/admin/DvcLAB/console/#/realms/DvcLAB/users",
+      set_account_url: "https://auth.33.dvc/auth/realms/DvcLAB/account",
     }
   },
   filters:{

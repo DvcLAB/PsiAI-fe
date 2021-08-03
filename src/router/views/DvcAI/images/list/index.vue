@@ -24,7 +24,7 @@ export default {
       curTotal: 0,
       meta: {},
       loadingState: true,
-      set_account_url: "https://auth.dvclab.com/auth/realms/DvcLAB/account",
+      set_account_url: "https://auth.33.dvc/auth/realms/DvcLAB/account",
     };
   },
   mounted() {
