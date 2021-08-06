@@ -40,7 +40,8 @@ export default {
       myJson: {},
       bucketname: this.datasetname,
       //数据集文件浏览部分的面包屑导航
-      items: this.$store.state.datasets.items
+      items: this.$store.state.datasets.items,
+      sortLowToHigh: true
     };
   },
   components: {vueDropzone: vue2Dropzone, FileTemplateList},
@@ -76,8 +77,35 @@ export default {
       this.viewUpload = false
     },
 
-    
-  },
+    // 列表排序
+    sortByKey(key){
+      this.sortLowToHigh = !this.sortLowToHigh;
+      if(this.sortLowToHigh){
+        return this.objStream.sort(function(a,b){
+        var x = a[key];
+        var y = b[key];
+        // 从小到大
+        return((x<y)?-1:((x>y)?1:0));
+      })}else{
+        return this.objStream.sort(function(a,b){
+        var x = a[key];
+        var y = b[key];
+        // 从小到大
+        return((x<y)?((x>y)?1:0):-1);
+      })
+      }
+      
+    },
+    sortBySize() {
+      this.sortByKey('size');
+    },
+    sortByName() {
+      this.sortByKey('name');
+    },
+    sortByTime() {
+      this.sortByKey('lastModified');
+    }
+}
 };
 </script>
 
@@ -87,7 +115,7 @@ export default {
         <div class="d-md-flex">
           <div class="w-100">
             <div class="card">
-              <!-- 文件浏览 -->
+              <!-- 文件列表 -->
               <div class="card-body" v-if="!viewUpload">
                 <div>
                   <div class="row mb-3">
@@ -95,18 +123,18 @@ export default {
                     <div class="col-xl-6 col-sm-6">
                       <div class="mt-2 page-title-left">
                         <h5>
-                          <a @click="$store.commit('datasets/clearPrefix')">{{datasetname}}</a>
-                          <a v-for="folderName in items" :key="folderName" @click="$store.commit('datasets/skipToFolder',folderName)"><i class="bx bx-chevron-right" style="font-size: 15px;vertical-align: middle;"></i>{{folderName}}</a>
+                          <a class="link_a" @click="$store.commit('datasets/clearPrefix')">{{datasetname}}</a>
+                          <span v-for="folderName in items" :key="folderName">
+                            <i class="bx bx-chevron-right" style="font-size: 15px;vertical-align: middle;"></i>
+                            <a class="link_a" @click="$store.commit('datasets/skipToFolder',folderName)">{{folderName}}</a></span>
                         </h5>
                       </div>
                     </div>
+                    <!-- 搜索文件和上传文件跳转按钮 -->
                     <div class="col-xl-6 col-sm-6">
                       <form
                         class="mt-4 mt-sm-0 float-sm-end d-flex align-items-center"
                       > 
-                        <!-- <div class="btn btn-primary mb-2" title="上传文件" @click="listFiles">
-                          测试
-                        </div> -->
                         <div class="search-box mb-2 me-2">
                           <div class="position-relative">
                             <input
@@ -134,15 +162,18 @@ export default {
                     >
                       <thead>
                         <tr>
-                          <th scope="col" style="width:45%">名称</th>
-                          <th scope="col" style="width:30%">更新时间</th>
-                          <th scope="col" colspan="2" style="width:25%">大小</th>
+                          <th scope="col" style="width:40%" @click="sortByName">名称<i class="bx bxs-sort-alt"></i></th>
+                          <th scope="col" style="width:15%" @click="sortBySize">大小<i class="bx bxs-sort-alt"></i></th>
+                          <th scope="col" style="width:30%" @click="sortByTime">更新时间<i class="bx bxs-sort-alt"></i></th>
+                          <!-- 下载和删除按钮 -->
+                          <th scope="col" style="width:15%"></th>
                         </tr>
                       </thead>
-                      <tbody>
-                        <FileTemplateList v-for="item in objStream" :key="item.id" :file="item" :bucket="datasetname" :fileList="objStream" />
-                      </tbody>
+                      <transition-group name="flip-list" tag="tbody">
+                        <FileTemplateList v-for="item in objStream" :key="item.name ? item.name : item.prefix" :file="item" :bucket="datasetname" :fileList="objStream" />
+                      </transition-group>
                     </table>
+
                   </div>
                   
                   <!-- end row -->
@@ -205,3 +236,15 @@ export default {
     </div>
     <!-- end row -->
 </template>
+<style scoped>
+.link_a {
+  color: #495057;
+}
+.link_a:hover {
+  color: #556ee6;
+  cursor:pointer;
+}
+.flip-list-move {
+  transition: transform 0.5s;
+}
+</style>

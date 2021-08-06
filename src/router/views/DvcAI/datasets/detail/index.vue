@@ -106,18 +106,21 @@ export default {
   <div>
     <PageHeader :title="dataset.name" :items="items" />
     <LoaderContainer :loading="loadingState">
-      <div class="row font-size-14">
-        
-        <div class="col-12" :class="this.$store.state.datasets.contentWidth">
+      <div name="list" class="row font-size-14 flip-list">
+        <div class="col-12 trans" :class="this.$store.state.datasets.contentWidth">
           <Header :dataset="dataset"/>
           <Content :dataset="dataset" :isAdmin="isAdmin"/>
         </div>
-
-        <div class="col-12" :class="this.$store.state.datasets.sideBarWidth">
+        <div class="col-12 trans" :class="this.$store.state.datasets.sideBarWidth">
           <Rightsidebar :dataset="dataset" :isAdmin="isAdmin" @changeLoading="onLoading" />
         </div>
-
       </div>
     </LoaderContainer>
   </div>
 </template>
+<style scoped>
+.trans {
+  transition: all 1s;
+  display: inline-block;
+}
+</style>

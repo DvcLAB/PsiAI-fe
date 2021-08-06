@@ -56,7 +56,7 @@ export default {
       var stream = s3Client.extensions.listObjectsV2WithMetadata(this.datasetname,'', false,'');
       stream.on('data', data => {
         this.objStream.push(data);
-        console.log("objStream:"+this.objStream);
+        console.log("objStream:"+data);
       })
     },
 

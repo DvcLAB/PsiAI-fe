@@ -32,6 +32,7 @@ export default {
                     "gz": 'mdi mdi-folder-zip text-warning',
             },
             viewName:'',
+            show:true
         }
     },
     props: {
@@ -92,9 +93,10 @@ export default {
               }
               console.log('Removed the object')
             });
-            this.$parent.objStream = this.$parent.objStream.filter((item) => {
-                return !this.file.name.includes(item.name)
-            });
+            this.show = false
+            // this.$parent.objStream = this.$parent.objStream.filter((item) => {
+            //     return !this.file.name.includes(item.name)
+            // });
             // this.$parent.listFiles();
         },
 
@@ -161,7 +163,7 @@ export default {
 }
 </script>
 <template>
-    <tr @dblclick="enterFolder">
+    <tr @dblclick="enterFolder"  v-if="show">
         <td class="text-truncate">
         <a
             href="javascript: void(0);"
@@ -173,23 +175,39 @@ export default {
             {{viewName}}</a
         >
         </td>
-        <td class="text-truncate">{{ file.lastModified | moment("YYYY-MM-DD HH:mm:ss") }}</td>
         <td class="text-truncate">{{formatFileSize(file.size)}}</td>
+        <td class="text-success">{{ file.lastModified | moment("YYYY-MM-DD HH:mm:ss") }}</td>
         <td>
-        <b-dropdown
-            toggle-class="font-size-16 text-muted p-0"
-            menu-class="dropdown-menu-end"
-            variant="white"
-            right
-        >
-            <template #button-content>
-            <i class="mdi mdi-dots-horizontal"></i>
-            </template>
-
-            <b-dropdown-item href="#" @click="downLoadFile(bucket,file.name,file.name.substring(file.name.lastIndexOf('.') + 1))">下载</b-dropdown-item>
-            <!-- <b-dropdown-divider></b-dropdown-divider> -->
-            <b-dropdown-item href="#" @click="removeFile">删除</b-dropdown-item>
-        </b-dropdown>
+            <!-- <b-button
+                class="text-truncate i-text-middle btn-item me-2"
+                variant="outline-success"
+                size="md"
+                @click="downLoadFile(bucket,file.name,file.name.substring(file.name.lastIndexOf('.') + 1))"
+                title="下载"
+            >
+                <i class="bx bx-download font-size-16 align-middle"></i>
+            </b-button>
+            <b-button
+                class="text-truncate i-text-middle btn-item me-2"
+                variant="outline-danger"
+                size="md"
+                @click="removeFile"
+                title="删除"
+            >
+                <i class="bx bx-trash font-size-16 align-middle"></i>
+            </b-button> -->
+            <ul class="list-inline font-size-20 contact-links mb-0">
+                <li class="list-inline-item px-2">
+                    <a v-b-tooltip.hover title="下载" @click="downLoadFile(bucket,file.name,file.name.substring(file.name.lastIndexOf('.') + 1))">
+                        <i class="bx bx-download"></i>
+                    </a>
+                </li>
+                <li class="list-inline-item px-2">
+                    <a v-b-tooltip.hover title="删除" @click="removeFile">
+                        <i class="bx bx-trash"></i>
+                    </a>
+                </li>
+            </ul>
         </td>
     </tr>
     <!-- end col -->
