@@ -247,6 +247,7 @@ export default {
 
     // 跳转创建数据集页面
     toCreateDatasetsPage() {
+      console.log("跳转到数据集创建页")
       this.$router.push({path: '/datasets/create'});
     },
     

@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import PageHeader from "@/components/page-header";
 import LoaderContainer from "@/components/DvcAI/loader-container";
 import Rightsidebar from "./rightsidebar";
+import MemberManage from "./member-manage";
 import Header from './header';
 import Content from './content';
 import appConfig from "@/app.config";
@@ -18,7 +19,7 @@ export default {
     title: "数据集详情",
     meta: [{ name: "description", content: appConfig.description }]
   },
-  components: { PageHeader, LoaderContainer, Rightsidebar, Header, Content},
+  components: { PageHeader, LoaderContainer, Rightsidebar, Header, Content, MemberManage},
   data() {
     return {
       title: "数据集详情",
@@ -111,8 +112,9 @@ export default {
           <Header :dataset="dataset"/>
           <Content :dataset="dataset" :isAdmin="isAdmin"/>
         </div>
-        <div class="col-12 trans" :class="this.$store.state.datasets.sideBarWidth">
+        <div class="col-12 trans col-md-4" v-show="this.$store.state.datasets.sideBarShow">
           <Rightsidebar :dataset="dataset" :isAdmin="isAdmin" @changeLoading="onLoading" />
+          <MemberManage v-if="this.$store.state.datasets.showMemberManage" :dataset="dataset" :isAdmin="isAdmin" @changeLoading="onLoading"/>
         </div>
       </div>
     </LoaderContainer>
@@ -120,7 +122,7 @@ export default {
 </template>
 <style scoped>
 .trans {
-  transition: all 1s;
+  transition: all 0.5s;
   display: inline-block;
 }
 </style>

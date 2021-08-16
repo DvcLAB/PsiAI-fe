@@ -20,6 +20,11 @@ export default {
   data() {
     return {
       loadingState: false,
+      datasetStatusSelected: 'public',
+      locationOptions: [
+        { text: '公开', value: 'public', disabled: false },
+        { text: '私有', value: 'private', disabled: false }
+      ],
     };
   },
   computed:{
@@ -75,6 +80,29 @@ export default {
     backDatasetsList() {
       this.$router.push({path: '/datasets'})
     },
+
+    // 私有数据集切换到公开数据集时弹框确认
+    confirmWindow() {
+      if(this.datasetStatusSelected == "public") {
+        Swal.fire({
+          icon:'question',
+          title: '确认要将私有数据集设为公开吗?',
+          showCancelButton: true,
+          confirmButtonText: `确认`,
+          cancelButtonText: `取消`
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.datasetStatusSelected = "public"
+            this.$store.commit('datasets/showMemberManage',false)
+          } else {
+            this.datasetStatusSelected = "private"
+            this.$store.commit('datasets/showMemberManage',true)
+          }
+        })
+      } else if(this.datasetStatusSelected == "private") {
+          this.$store.commit('datasets/showMemberManage',true)
+      }
+    }
   },
 };
 </script>
@@ -106,7 +134,19 @@ export default {
         <span class="text-success">{{ dataset.update_time | moment("YYYY-MM-DD HH:mm:ss") }}</span>
       </p>
       <div v-if="canEdit" class="mt-4">
-        <b-button
+        <b-form-radio-group
+          id="location-radios"
+          class="text-truncate check-group btn-item mb-0"
+          size="md"
+          v-model="datasetStatusSelected"
+          @change="confirmWindow"
+          :options="locationOptions"
+          buttons
+          button-variant="outline-primary"
+          name="local-cloud-radios"
+        >
+        </b-form-radio-group>
+        <!-- <b-button
           class="text-truncate i-text-middle btn-item me-2 mb-2"
           variant="outline-danger"
           size="md"
@@ -114,7 +154,7 @@ export default {
         >
           <i class="bx bx-trash font-size-16 align-middle me-1"></i>
           删除
-        </b-button>
+        </b-button> -->
       </div>
     </div>
   </div>

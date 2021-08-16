@@ -1,14 +1,13 @@
 <script>
 import Config from "./config";
 import FileManager from "@/components/DvcAI/datasets/file-manager";
-import FileManagerList from "@/components/DvcAI/datasets/file-manager-list";
-
+// import FileManagerList from "@/components/DvcAI/datasets/file-manager-list";
 /**
  * Dataset Card Content component
  */
 
 export default {
-  components: { Config, FileManager, FileManagerList},
+  components: { Config, FileManager},
   props: {
     dataset: {
       type: Object,
@@ -64,9 +63,9 @@ export default {
         </span>
         <span class="d-none d-sm-inline-block">文件浏览</span>
       </template>
-      <FileManager :datasetname="dataset.name" :isAdmin="isAdmin"/>
+      <FileManager :datasetname="dataset.name" :isAdmin="isAdmin" :key="$store.state.datasets.prefix"/>
     </b-tab>
-    <b-tab class="border-0" @click="switchFileManager">
+    <!-- <b-tab class="border-0" @click="switchFileManager">
       <template v-slot:title>
         <span class="d-inline-block d-sm-none">
           <i class="bx bx-file"></i>
@@ -74,7 +73,8 @@ export default {
         <span class="d-none d-sm-inline-block">文件浏览</span>
       </template>
       <FileManagerList :datasetname="dataset.name" :isAdmin="isAdmin" :key="$store.state.datasets.prefix"/>
-    </b-tab>
+    </b-tab> -->
+    
   </b-tabs>
   
   

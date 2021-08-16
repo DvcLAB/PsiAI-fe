@@ -104,6 +104,42 @@ export default {
     },
     sortByTime() {
       this.sortByKey('lastModified');
+    },
+
+    setIframeHeight() {
+        console.log("设置自适应")
+        var myiframe = document.getElementById("myiframe");
+        console.log(myiframe)
+        var iframeWin = window.frames["myframe"]
+        var iframeDoc = iframeWin.document
+        console.log(iframeWin)
+        console.log(iframeDoc)
+        // if (iframeWin.document.body) {
+        //     var imgs = iframeWin.document.body.getElementsByTagName("img");
+        //     for(var i = 0; i < imgs.length;i++){
+        //         imgs[i].style.maxWidth = "80%";
+        //     }
+        //     var a,b,c = 0;
+        //     var timer = window.setInterval(function () {
+        //         if(c == 1){
+        //             a = iframeWin.document.body.scrollHeight || iframeWin.document.body.scrollHeight;
+        //         }else if(c == 5){
+        //             b = iframeWin.document.body.scrollHeight || iframeWin.document.body.scrollHeight;
+        //             if(a == b){
+        //                 window.clearInterval(timer);
+        //             }
+        //             c = 0;
+        //         }
+        //         c++;
+        //         //包裹iframe标签的父元素标签，用于控制及宽度为父元素的100%
+        //         var detailContent = document.getElementsByClassName("detailContent")[0];
+        //         var iframeBody = iframeWin.document.body;
+        //         iframeBody.style.maxWidth = detailContent.clientWidth+'px';
+        //         iframeBody.style.width = detailContent.clientWidth+'px';
+        //         iframe.style.height = iframeWin.document.body.scrollHeight + "px" || iframeWin.document.documentElement.scrollHeight + "px";
+        //     },800);
+        // }
+    
     }
 }
 };
@@ -120,18 +156,18 @@ export default {
                 <div>
                   <div class="row mb-3">
                     <!-- 面包屑导航 -->
-                    <div class="col-xl-6 col-sm-6">
+                    <div class="col-xl-8 col-sm-6">
                       <div class="mt-2 page-title-left">
                         <h5>
                           <a class="link_a" @click="$store.commit('datasets/clearPrefix')">{{datasetname}}</a>
-                          <span v-for="folderName in items" :key="folderName">
+                          <span v-for="(folderName,index) in items" :key="index">
                             <i class="bx bx-chevron-right" style="font-size: 15px;vertical-align: middle;"></i>
-                            <a class="link_a" @click="$store.commit('datasets/skipToFolder',folderName)">{{folderName}}</a></span>
+                            <a class="link_a" @click="$store.commit('datasets/skipToFolder',index)">{{folderName}}</a></span>
                         </h5>
                       </div>
                     </div>
                     <!-- 搜索文件和上传文件跳转按钮 -->
-                    <div class="col-xl-6 col-sm-6">
+                    <div class="col-xl-4 col-sm-6">
                       <form
                         class="mt-4 mt-sm-0 float-sm-end d-flex align-items-center"
                       > 
@@ -152,9 +188,29 @@ export default {
                     </div>
                   </div>
                 </div>
-
+                <!-- 图片预览 -->
+                <div v-if="$store.state.datasets.isFile" style="text-align: center; margin-top: 20px;">
+                  <!-- <img
+                    class="img-thumbnail"
+                    style="max-width: 60%;"
+                    alt="图片"
+                    :src="$store.state.datasets.previewUrl"
+                    data-holder-rendered="true"
+                  /> -->
+                  <iframe
+                    id="myframe"
+                    class="img-thumbnail"
+                    :src="$store.state.datasets.previewUrl"
+                    style="width: 100%;"
+                  >
+                      <head>
+                          <meta http-equiv="Content-Type" content="text/html; charset=gbk" />
+                      </head>
+                  </iframe>
+                </div>
+                
                 <!-- My File内容，文件浏览 -->
-                <div>
+                <div v-else>
                   <div class="table-responsive">
                     <table
                       class="table align-middle table-nowrap table-hover mb-0"
@@ -178,7 +234,8 @@ export default {
                   
                   <!-- end row -->
                 </div>
-                 </div>
+
+              </div>
               <!-- 上传文件 -->
               <div class="row card-body" v-else>
                 <div>

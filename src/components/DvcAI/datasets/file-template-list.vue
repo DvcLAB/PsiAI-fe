@@ -32,7 +32,8 @@ export default {
                     "gz": 'mdi mdi-folder-zip text-warning',
             },
             viewName:'',
-            show:true
+            show:true,
+            presignedUrl: ''
         }
     },
     props: {
@@ -115,8 +116,9 @@ export default {
                     let linkElement = document.createElement("a");
                     //创建 blob对象 第一个参数 response.data是代表后端返回的文件流  ，第二个参数设置文件类型
                     let blob = new Blob([data], { type: contentType });
-                    //生成生成下载链接  这个链接放在a标签上是直接下载，放在img上可以直接显示图片问价，视频同理
+                    //生成生成下载链接  这个链接放在a标签上是直接下载，放在img上可以直接显示图片，视频同理
                     const url = window.URL.createObjectURL(blob);
+                    console.log(url);
                     linkElement.setAttribute("href", url);
                     linkElement.setAttribute("target", '_blank');
                     linkElement.setAttribute("download", filename);
@@ -153,11 +155,28 @@ export default {
         enterFolder() {
             if(!this.file.name) {
                 // 如果这个元素不是文件而是一个文件夹，双击才进入下一级
-                this.$store.commit('datasets/enterFolder',this.file.prefix)
+                this.$store.commit('datasets/enterFolder',{
+                    prefix:this.file.prefix,
+                    isFile:false
+                })
             }else{
-                // 如果这是个文件，那么双击应该出现文件预览界面
+                console.log("这是个文件")
+                console.log("改完路径了")
+                this.$store.commit('datasets/enterFolder',{
+                    prefix:this.file.name,
+                    isFile:true
+                })
+                console.log(this.$store.state.datasets.isFile)
+                s3Client.presignedGetObject(this.bucket, this.file.name, 24*60*60, (err, presignedUrl) => {
+                    if (err) return console.log(err)
+                    this.previewUrl(presignedUrl)
+                });
                 
             }
+        },
+        previewUrl(url) {
+            console.log("wo"+url)
+            this.$store.commit('datasets/previewUrl',url);
         }
     }
 }
@@ -178,24 +197,6 @@ export default {
         <td class="text-truncate">{{formatFileSize(file.size)}}</td>
         <td class="text-success">{{ file.lastModified | moment("YYYY-MM-DD HH:mm:ss") }}</td>
         <td>
-            <!-- <b-button
-                class="text-truncate i-text-middle btn-item me-2"
-                variant="outline-success"
-                size="md"
-                @click="downLoadFile(bucket,file.name,file.name.substring(file.name.lastIndexOf('.') + 1))"
-                title="下载"
-            >
-                <i class="bx bx-download font-size-16 align-middle"></i>
-            </b-button>
-            <b-button
-                class="text-truncate i-text-middle btn-item me-2"
-                variant="outline-danger"
-                size="md"
-                @click="removeFile"
-                title="删除"
-            >
-                <i class="bx bx-trash font-size-16 align-middle"></i>
-            </b-button> -->
             <ul class="list-inline font-size-20 contact-links mb-0">
                 <li class="list-inline-item px-2">
                     <a v-b-tooltip.hover title="下载" @click="downLoadFile(bucket,file.name,file.name.substring(file.name.lastIndexOf('.') + 1))">

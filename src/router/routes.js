@@ -68,14 +68,6 @@ export default [
         component: () => import('./views/DvcAI/datasets/list'),
       },
       {
-        path: ':id',
-        name: '数据集详情',
-        meta: {
-          authRequired: true,
-        },
-        component: () => import('./views/DvcAI/datasets/detail'),
-      },
-      {
         path: 'create',
         name: '创建数据集',
         meta: {
@@ -83,6 +75,15 @@ export default [
         },
         component: () => import('./views/DvcAI/datasets/create'),
       },
+      {
+        path: ':id',
+        name: '数据集详情',
+        meta: {
+          authRequired: true,
+        },
+        component: () => import('./views/DvcAI/datasets/detail'),
+      },
+      
     ],
   },
   {
