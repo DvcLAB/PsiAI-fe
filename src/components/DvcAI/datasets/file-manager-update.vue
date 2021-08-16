@@ -1,5 +1,6 @@
 <script>
 import FileTemplateList from "./file-template-list.vue"
+import FilePreview from "./file-preview.vue"
 var Minio = require('minio')
  
 var s3Client = new Minio.Client({
@@ -7,9 +8,6 @@ var s3Client = new Minio.Client({
     accessKey: 'HNGU1VB7FDD4WYQ537BD',
     secretKey: 'gDaPHd6CwgDYUafDtE3rLgnz7CAJ1wxHu23DrNhT'
    })
-/**
- * File-manager component
- */
 export default {
   props: {
     datasetname: {
@@ -25,7 +23,6 @@ export default {
         maxFilesize: 0.5,
         headers: { "My-Awesome-Header": "header value" }
       },
-      viewUpload: false,
       objStream: [],
       myString: '',
       myJson: {},
@@ -36,7 +33,7 @@ export default {
       isImg: true
     };
   },
-  components: {FileTemplateList},
+  components: {FileTemplateList, FilePreview},
   mounted() {
     this.listFiles();
   },
@@ -47,23 +44,11 @@ export default {
       var stream = s3Client.extensions.listObjectsV2WithMetadata(this.datasetname,this.$store.state.datasets.prefix, false,'');
       stream.on('data', data => {
         this.objStream.push(data);
+        console.log(data)
       })
       this.isImg = true;
       return this.objStream;
     },
-
-
-// listFile(){
-//       // 测试搜索
-//       this.objStream = [];
-//       var stream = s3Client.extensions.listObjectsV2WithMetadata(this.datasetname,'EAD',true,'');
-//       stream.on('data', data => {
-//         this.objStream.push(data);
-//         console.log("返回",data)
-//       })
-//       return this.objStream;
-//     },
-
 
     // 展示上传文件的组件
     touploadFile() {
@@ -105,7 +90,10 @@ export default {
 </script>
 
 <template>
-    <div class="card-body" v-if="!viewUpload">
+  <div v-if="!$store.state.datasets.viewUpload">
+    <!-- 文件浏览 -->
+    <div class="card-body" v-if="!$store.state.datasets.viewPreview">
+      <!-- 面包屑导航和搜索框上传跳转按钮 -->
       <div>
         <div class="row mb-3">
           <!-- 面包屑导航 -->
@@ -144,28 +132,8 @@ export default {
           </div>
         </div>
       </div>
-      <!-- 图片预览 -->
-      <div v-if="$store.state.datasets.isFile" style="text-align: center; margin-top: 20px;">
-        <img
-          id="datasetImg"
-          v-if="$store.state.datasets.isImg"
-          class="img-thumbnail"
-          style="max-width: 60%;"
-          :src="$store.state.datasets.previewUrl"
-          data-holder-rendered="true"
-        />
-        <iframe
-          v-else
-          id="myframe"
-          class="img-thumbnail"
-          :src="$store.state.datasets.previewUrl"
-          style="width: 90%;"
-        >
-        </iframe>
-      </div>
-      
       <!-- My File内容，文件浏览 -->
-      <div v-else>
+      <div>
         <div class="table-responsive">
           <table
             class="table align-middle table-nowrap table-hover mb-0"
@@ -189,8 +157,10 @@ export default {
         
         <!-- end row -->
       </div>
-
     </div>
+    <!-- 文件预览 -->
+    <FilePreview :datasetname="datasetname" v-else/>
+  </div>
 </template>
 <style scoped>
 .link_a {

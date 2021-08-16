@@ -1,4 +1,3 @@
-
 export const state = {
   // 数据集详情页展示基本信息和文件浏览时，页面布局弹性变化
   contentWidth: 'col-md-8',
@@ -8,10 +7,13 @@ export const state = {
   items: [],
   objStream: [],
   viewUpload: false,
+  viewPreview: false,
   previewUrl: '',
   isFile: false,
   isImg: true,
   showMemberManage: false,
+  fileSize: '',
+  fileModified: ''
 };
 
 export const mutations = {
@@ -28,7 +30,8 @@ export const mutations = {
     // 返回根列表
     state.prefix = '',
     state.items = [],
-    state.isFile = false
+    state.isFile = false,
+    state.viewPreview = false
   },
   skipToFolder(state,index) {
     //点击最后一层导航时页面不变化
@@ -38,6 +41,7 @@ export const mutations = {
       state.prefix = state.items.join("/")+'/'
       // 更改面包屑导航的数组
       state.isFile = false
+      state.viewPreview = false
     }
   },
   // 双击文件夹进入下一级菜单时控制文件浏览页面元素变化
@@ -67,6 +71,19 @@ export const mutations = {
   previewUrl(state,url) {
     state.previewUrl = url;
     state.isImg =  /\.(xbm|tif|pjp|svgz|jpg|jpeg|ico|tiff|gif|svg|jfif|webp|png|bmp|pjpeg|avif)/.test(url);
+    state.viewPreview = true
+  },
+  fileMetadata(state,metaData) {
+    state.fileSize = metaData.fileSize;
+    state.fileModified = metaData.fileModified;
+  },
+  // 展示预览文件的组件
+  toPreviewFile(state) {
+    state.viewPreview = true
+  },
+  // 从预览文件返回查看文件列表
+  returnFromPreview(state) {
+    state.viewPreview = false
   },
   showMemberManage(state,ifShow) {
     state.showMemberManage = ifShow

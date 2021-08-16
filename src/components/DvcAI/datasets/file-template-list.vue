@@ -104,6 +104,7 @@ export default {
         // 下载文件
         downLoadFile(bucket,fileName,suffix) {
             // var size = 0
+            console.log(fileName)
             s3Client.getObject(bucket, fileName, function(err, dataStream) {
                 if (err) {
                     return console.log(err)
@@ -160,13 +161,14 @@ export default {
                     isFile:false
                 })
             }else{
-                console.log("这是个文件")
-                console.log("改完路径了")
                 this.$store.commit('datasets/enterFolder',{
                     prefix:this.file.name,
                     isFile:true
                 })
-                console.log(this.$store.state.datasets.isFile)
+                this.$store.commit('datasets/fileMetadata',{
+                    fileModified:this.file.lastModified,
+                    fileSize:this.file.size
+                })
                 s3Client.presignedGetObject(this.bucket, this.file.name, 24*60*60, (err, presignedUrl) => {
                     if (err) return console.log(err)
                     this.previewUrl(presignedUrl)
@@ -175,7 +177,6 @@ export default {
             }
         },
         previewUrl(url) {
-            console.log("wo"+url)
             this.$store.commit('datasets/previewUrl',url);
         }
     }
