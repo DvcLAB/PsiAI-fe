@@ -58,10 +58,12 @@ export default {
     </b-tab>
     <b-tab class="border-0" @click="switchFileManager">
       <template v-slot:title>
-        <span class="d-inline-block d-sm-none">
-          <i class="bx bx-file"></i>
-        </span>
-        <span class="d-none d-sm-inline-block">文件浏览</span>
+        <div @click="$store.commit('datasets/clearPrefix')">
+          <span class="d-inline-block d-sm-none">
+            <i class="bx bx-file"></i>
+          </span>
+          <span class="d-none d-sm-inline-block">文件浏览</span>
+        </div>
       </template>
       <FileManager :datasetname="dataset.name" :isAdmin="isAdmin" :key="$store.state.datasets.prefix"/>
     </b-tab>
