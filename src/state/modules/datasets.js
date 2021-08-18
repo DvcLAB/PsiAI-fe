@@ -13,7 +13,9 @@ export const state = {
   isImg: true,
   showMemberManage: false,
   fileSize: '',
-  fileModified: ''
+  fileModified: '',
+  deleteFiles: [],
+  checked: false,
 };
 
 export const mutations = {
@@ -28,10 +30,11 @@ export const mutations = {
   },
   clearPrefix(state) {
     // 返回根列表
-    state.prefix = '',
-    state.items = [],
-    state.isFile = false,
+    state.prefix = ''
+    state.items = []
+    state.isFile = false
     state.viewPreview = false
+    state.deleteFiles = [];
   },
   skipToFolder(state,index) {
     //点击最后一层导航时页面不变化
@@ -87,7 +90,29 @@ export const mutations = {
   },
   showMemberManage(state,ifShow) {
     state.showMemberManage = ifShow
-    console.log(state.showMemberManage)
+  },
+  changeAllChecked(state, checkedArr) {
+    if (state.checked) {
+      state.deleteFiles = checkedArr
+    } else {
+      state.deleteFiles = []
+    }
+    console.log("deleteFilesall:"+state.deleteFiles)
+  },
+  checked(state) {
+    state.checked = !state.checked
+  },
+  pushDeleteFiles(state, fileName) {
+    state.deleteFiles.push(fileName)
+    console.log("deleteFilesadd:"+state.deleteFiles)
+  },
+  popDeleteFiles(state, fileName) {
+    state.deleteFiles.splice(state.deleteFiles.indexOf(fileName),1)
+    console.log("deleteFilespop:"+state.deleteFiles)
+  },
+  clearDeleteFiles(state) {
+    state.deleteFiles = []
+    console.log("deleteFilesclear:"+state.deleteFiles)
   }
 };
 

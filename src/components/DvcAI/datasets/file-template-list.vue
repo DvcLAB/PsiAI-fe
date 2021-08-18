@@ -33,7 +33,7 @@ export default {
             },
             viewName:'',
             show:true,
-            presignedUrl: ''
+            presignedUrl: '',
         }
     },
     props: {
@@ -152,9 +152,10 @@ export default {
             }
         },
 
-        //双击文件夹，进入下一级视图
+        //点击文件夹，进入下一级视图，点击文件则进入预览视图
         enterFolder() {
-            if(!this.file.name) {
+            if(!this.$store.state.datasets.manage) {
+                if(!this.file.name) {
                 // 如果这个元素不是文件而是一个文件夹，双击才进入下一级
                 this.$store.commit('datasets/enterFolder',{
                     prefix:this.file.prefix,
@@ -173,30 +174,57 @@ export default {
                     if (err) return console.log(err)
                     this.previewUrl(presignedUrl)
                 });
-                
+            }
             }
         },
         previewUrl(url) {
             this.$store.commit('datasets/previewUrl',url);
+        },
+        changeDeleteFiles() {
+            var fileName = this.file.name ? this.file.name : this.file.prefix
+            if(!this.checked) {
+                this.$store.commit('datasets/pushDeleteFiles',fileName);
+            }else{
+                this.$store.commit('datasets/popDeleteFiles',fileName);
+            }
+            this.checked = !this.checked
+        },
+        
+    },
+    computed: {
+        checked: {
+            get: function () {
+                var fileName = this.file.name ? this.file.name :this.file.prefix
+                var isChecked = this.$store.state.datasets.deleteFiles.includes(fileName)
+                console.log(isChecked)
+                return isChecked
+            },
+                // setter
+            set: function () {
+                console.log("checked:::"+this.checked)
+            }
         }
     }
 }
 </script>
 <template>
-    <tr @dblclick="enterFolder"  v-if="show">
-        <td class="text-truncate">
-        <a
-            href="javascript: void(0);"
-            class="text-dark fw-medium"
-            ><i
-            class="font-size-16 align-middle me-2"
-            :class="getSuffix(file.name)"
-            ></i>
-            {{viewName}}</a
-        >
+    <tr v-if="show">
+        <td>
+            <input type="checkbox" v-model="checked" @change="changeDeleteFiles">
         </td>
-        <td class="text-truncate">{{formatFileSize(file.size)}}</td>
-        <td class="text-success">{{ file.lastModified | moment("YYYY-MM-DD HH:mm:ss") }}</td>
+        <td class="text-truncate" @click="enterFolder">
+            <a
+                href="javascript: void(0);"
+                class="text-dark fw-medium"
+                ><i
+                class="font-size-16 align-middle me-2"
+                :class="getSuffix(file.name)"
+                ></i>
+                {{viewName}}
+            </a>
+        </td>
+        <td class="text-truncate" @click="enterFolder">{{formatFileSize(file.size)}}</td>
+        <td class="text-success" @click="enterFolder">{{ file.lastModified | moment("YYYY-MM-DD HH:mm:ss") }}</td>
         <td>
             <ul class="list-inline font-size-20 contact-links mb-0">
                 <li class="list-inline-item px-2">
